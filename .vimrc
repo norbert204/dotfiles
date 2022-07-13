@@ -15,6 +15,8 @@ set smartindent
 set smarttab
 set softtabstop=4
 
+filetype plugin indent on
+
 colorscheme cobalt
 
 "   --  Initialize plugins  --"
@@ -41,6 +43,9 @@ inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 let &t_SI = "\<esc>[5 q"
 let &t_SR = "\<esc>[5 q"
 let &t_EI = "\<esc>[2 q" 
+
+"   --  Setting the correct font for gvim   --  "
+set guifont=MesloLGS\ NF\ 12
 
 "   --  Initialize powerline statusbar  --  "
 let g:powerline_pycmd="py3"
