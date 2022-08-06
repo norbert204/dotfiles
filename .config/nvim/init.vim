@@ -23,6 +23,11 @@ set splitbelow
 
 syntax on
 
+"   --  Setting up the integrated terminal emulator --
+set shell=/usr/bin/fish
+tnoremap <Esc> <C-\><C-n>
+nnoremap T :split<bar>term<cr><c-w>J:resize10<cr>
+
 "   --  Insert mode keybindings --
 "
 "   Use jk keycombo instead of Esc to exit insert mode" 
