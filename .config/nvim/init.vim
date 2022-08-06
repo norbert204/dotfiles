@@ -17,6 +17,10 @@ set mouse=a
 set clipboard=unnamedplus
 set cursorline
 
+"   --  New splits on the right and the bottom  --
+set splitright
+set splitbelow
+
 syntax on
 
 "   --  Insert mode keybindings --
