@@ -1,6 +1,6 @@
 "
 "   Made by Horváth Norbert
-"   Last edited: 2022.07.30
+"   Last edited: 2022.08.18
 "
 "   --  Some basic settings     --  "
 set encoding=utf-8
@@ -50,6 +50,8 @@ call plug#begin()
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
     "   Code completion
     Plug 'neoclide/coc.nvim', {'branch': 'release'} 
+    "   Autosave
+    Plug 'Pocco81/auto-save.nvim'
 call plug#end()
 
 "   --  Lightline status bar  --  "
@@ -122,4 +124,12 @@ require'nvim-treesitter.configs'.setup {
         additional_vim_regex_highlighting = false,
     },
 }
+EOF
+
+"   --  Autosave config --
+lua << EOF
+	require("auto-save").setup {
+		-- your config goes here
+		-- or just leave it empty :)
+	}
 EOF
