@@ -354,28 +354,26 @@ end
 --  Language servers
 --
 
-local lsp = require('lspconfig')
-
 --  Python
-lsp["pyright"].setup {
+require('lspconfig')["pyright"].setup {
     on_attach = on_attach,
     capabilities = capabilities,
 }
 
 --  Java
-lsp["jdtls"].setup {
+require('lspconfig')["jdtls"].setup {
     on_attach = on_attach,
     capabilities = capabilities,
 }
 
 --  C
-lsp["clangd"].setup {
+require('lspconfig')["clangd"].setup {
     on_attach = on_attach,
     capabilities = capabilities,
 }
 
 --  C#
-lsp["omnisharp"].setup {
+require('lspconfig')["csharp_ls"].setup {
     on_attach = on_attach,
     capabilities = capabilities 
 }
