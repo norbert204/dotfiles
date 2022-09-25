@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.09.04
+--  Last edit: 2022.09.25
 --
 
 local fn = vim.fn
@@ -8,6 +8,7 @@ local g = vim.g
 local opt = vim.opt
 local keymap = vim.keymap.set
 local cmd = vim.cmd
+local api = vim.api
 
 --
 --  Plugins
@@ -54,12 +55,21 @@ local function load_plugins()
             run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
         }
 
-        --  Intellisense
-        use {
+        --  CoC
+        --[[use {
             'neoclide/coc.nvim',
             branch = 'master',
             run = 'yarn install --frozen-lockfile'
-        }
+        }]]
+
+        -- LSP
+        use 'neovim/nvim-lspconfig'
+        use 'hrsh7th/nvim-cmp'
+        use 'hrsh7th/cmp-nvim-lsp'
+        use 'hrsh7th/cmp-buffer'
+        use 'hrsh7th/cmp-path' 
+        use 'hrsh7th/cmp-cmdline'
+        use 'L3MON4D3/LuaSnip'
 
         --  Autosave (might remove this, because we can replicate it with autocmds)
         use 'Pocco81/auto-save.nvim'
@@ -129,6 +139,9 @@ keymap('n', '<C-j>', "<C-w>j", map_options)
 keymap('n', '<C-k>', "<C-w>k", map_options)
 keymap('n', '<C-l>', "<C-w>l", map_options)
 
+--  Quickly open this config file
+cmd [[ nnoremap <F12> :e ~/.config/nvim/init.lua<cr> ]]
+
 --
 --  Visual mode
 
@@ -151,8 +164,10 @@ g.maplocalleader = " "
 --
 if fn.has("linux") then
     opt.shell = "/usr/bin/fish"
+else
+    opt.shell = "powershell"
 end
-keymap('t', "<esc>", "<C-\\><C-n>", map_options)
+keymap('t', "jk", "<C-\\><C-n>", map_options)
 
 cmd [[ nnoremap T :split<bar>term<cr><c-w>J:resize10<cr> ]]
 
@@ -164,7 +179,7 @@ cmd [[ nnoremap T :split<bar>term<cr><c-w>J:resize10<cr> ]]
 --  CoC config
 --
 
-cmd [[
+--[[cmd [[
     "   Jump between suggestions
     inoremap <silent><expr> <tab> 
         \ coc#pum#visible() ? coc#pum#next(1) : "\<tab>"
@@ -192,15 +207,7 @@ cmd [[
 cmd [[
     let g:lightline = {
         \ 'colorscheme': 'sonokai',
-        \ 'active': {
-        \   'left': [ [ 'mode', 'paste' ],
-        \             [ 'cocstatus', 'readonly', 'filename', 'modified' ] ]
-        \ },
-        \ 'component_function': {
-        \   'cocstatus': 'coc#status'
-        \ },
         \ }
-    autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
 ]]
 
 
@@ -208,7 +215,7 @@ cmd [[
 --
 
 require("nvim-treesitter.configs").setup {
-    ensure_installed = { "c", "java", "lua" },
+    ensure_installed = { "c", "java", "lua", "python" },
     sync_install = false,
     auto_install = true,
     highlight = {
@@ -260,4 +267,115 @@ cmd [[
 require("auto-save").setup {
     -- your config goes here
     -- or just leave it empty :)
+}
+
+--  
+--  LSP
+--
+
+--  cmp
+--
+local cmp = require("cmp")
+
+opt.completeopt = {'menu', 'menuone', 'noselect'}
+
+cmp.setup {
+    snippet = {
+        expand = function(args)
+            require('luasnip').lsp_expand(args.body)
+        end,
+    },
+    mapping = cmp.mapping.preset.insert ({
+        ['<tab>']  = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                    cmp.select_next_item()
+                else
+                    fallback()
+                end 
+            end),
+        ['<S-tab>'] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                    cmp.select_prev_item()
+                else
+                    fallback()
+                end
+            end),
+        ['<C-Space>'] = cmp.mapping.complete(),
+        ['<C-e>'] = cmp.mapping.abort(),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    }),
+    sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "luasnip" },
+        { name = "buffer" },
+        { name = "path" },
+    }),
+}
+
+cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+        { name = 'buffer' }
+    }
+})
+  
+cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+        { name = 'path' }
+    }, {
+        { name = 'cmdline' }
+    })
+})
+
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+
+--  LSP itself
+--
+
+keymap('n', "<leader>e", vim.diagnostic.open_float, map_options)
+keymap('n', "ő", vim.diagnostic.goto_prev, map_options)
+keymap('n', "ú", vim.diagnostic.goto_next, map_options)
+
+local on_attach = function(client, bufnr)
+    api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+    local bufopts = { noremap = true, silent = true, buffer = bufnr }
+    
+    keymap('n', "K", vim.lsp.buf.hover, bufopts)
+    keymap('n', "<C-k>", vim.lsp.buf.signature_help, bufopts)
+    keymap('n', "gD", vim.lsp.buf.declaration, bufopts)
+    keymap('n', "gd", vim.lsp.buf.definition, bufopts)
+    keymap('n', "gi", vim.lsp.buf.implementation, bufopts)
+    keymap('n', "gr", vim.lsp.buf.references, bufopts)
+    keymap('n', "<leader><return>", vim.lsp.buf.code_action, bufopts)
+end
+
+--  Language servers
+--
+
+local lsp = require('lspconfig')
+
+--  Python
+lsp["pyright"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+}
+
+--  Java
+lsp["jdtls"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+}
+
+--  C
+lsp["clangd"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+}
+
+--  C#
+lsp["omnisharp"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities 
 }
