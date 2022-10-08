@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.09.25
+--  Last edit: 2022.10.08
 --
 
 local fn = vim.fn
@@ -130,6 +130,15 @@ keymap('i', 'jk', "<esc>", map_options)
 keymap('i', '<C-A>', "<esc>A", map_options)
 keymap('i', '<C-E>', "<esc>I", map_options)
 
+--  Auto-close brackets
+keymap('i', '"', '""<left>', map_options)
+keymap('i', "'", "''<left>", map_options)
+keymap('i', '(', "()<left>", map_options)
+keymap('i', '[', "[]<left>", map_options)
+keymap('i', '{', "{}<left>", map_options)
+keymap('i', '{<CR>', "{<CR>}<ESC>O", map_options)
+keymap('i', '{;<CR>', "{<CR>};<ESC>O", map_options)
+
 --
 --  Normal mode
 
@@ -140,7 +149,13 @@ keymap('n', '<C-k>', "<C-w>k", map_options)
 keymap('n', '<C-l>', "<C-w>l", map_options)
 
 --  Quickly open this config file
-cmd [[ nnoremap <F12> :e ~/.config/nvim/init.lua<cr> ]]
+if vim.loop.os_uname().sysname == "Linux" then
+    cmd [[ nnoremap <F12> :e ~/.config/nvim/init.lua<cr> ]]
+end
+
+--  When wrap is enabled, navigating the wraped lines is a pain by default
+keymap('n', 'j', "gj", map_options)
+keymap('n', 'k', "gk", map_options)
 
 --
 --  Visual mode
@@ -162,10 +177,10 @@ g.maplocalleader = " "
 --
 --  Terminal
 --
-if fn.has("linux") then
-    opt.shell = "/usr/bin/fish"
-else
+if vim.loop.os_uname().sysname == "Windows_NT" then
     opt.shell = "powershell"
+else
+    opt.shell = "/usr/bin/fish"
 end
 keymap('t', "jk", "<C-\\><C-n>", map_options)
 
@@ -248,8 +263,8 @@ require("neo-tree").setup({
     enable_diagnostics = true,
     sort_case_insensitive = true,
     source_selector = {
-        winbar = false,
-        statusline = true
+        winbar = true,
+        statusline = false
     },
     window = {
         width = 30
@@ -376,4 +391,10 @@ require('lspconfig')["clangd"].setup {
 require('lspconfig')["csharp_ls"].setup {
     on_attach = on_attach,
     capabilities = capabilities 
+}
+
+--  R 
+require('lspconfig')["r_language_server"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities
 }
