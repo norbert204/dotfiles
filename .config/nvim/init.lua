@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.10.08
+--  Last edit: 2022.10.09
 --
 
 local fn = vim.fn
@@ -107,6 +107,8 @@ opt.clipboard = "unnamedplus"
 opt.cursorline = true
 opt.wrap = false
 opt.signcolumn = "number"
+opt.scrolloff = 7
+opt.swapfile = false
 
 if fn.has("termguicolors") then
     opt.termguicolors = true
