@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.10.09
+--  Last edit: 2022.10.13
 --
 
 local fn = vim.fn
@@ -36,7 +36,10 @@ local function load_plugins()
         use 'sainnhe/sonokai'
 
         --  Statusline
-        use 'itchyny/lightline.vim'
+        use {
+            'nvim-lualine/lualine.nvim',
+            requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+        }
 
         --  File manager
         use {
@@ -44,7 +47,7 @@ local function load_plugins()
             branch = "v2.x",
             requires = {
                 "nvim-lua/plenary.nvim",
-                "kyazdani42/nvim-web-devicons", -- not strictly required, but recommended
+                --"kyazdani42/nvim-web-devicons", -- not strictly required, but recommended
                 "MunifTanjim/nui.nvim",
             }
         }
@@ -133,11 +136,14 @@ keymap('i', '<C-A>', "<esc>A", map_options)
 keymap('i', '<C-E>', "<esc>I", map_options)
 
 --  Auto-close brackets
-keymap('i', '"', '""<left>', map_options)
-keymap('i', "'", "''<left>", map_options)
+--keymap('i', '"', '""<left>', map_options)
+--keymap('i', "'", "''<left>", map_options)
 keymap('i', '(', "()<left>", map_options)
+keymap('i', '()', "()", map_options)
 keymap('i', '[', "[]<left>", map_options)
+keymap('i', '[]', "[]", map_options)
 keymap('i', '{', "{}<left>", map_options)
+keymap('i', '{}', "{}", map_options)
 keymap('i', '{<CR>', "{<CR>}<ESC>O", map_options)
 keymap('i', '{;<CR>', "{<CR>};<ESC>O", map_options)
 
@@ -152,7 +158,7 @@ keymap('n', '<C-l>', "<C-w>l", map_options)
 
 --  Quickly open this config file
 if vim.loop.os_uname().sysname == "Linux" then
-    cmd [[ nnoremap <F12> :e ~/.config/nvim/init.lua<cr> ]]
+    keymap('n', "<F12>", ":e ~/.config/nvim/init.lua<cr>", map_options)
 end
 
 --  When wrap is enabled, navigating the wraped lines is a pain by default
@@ -179,15 +185,14 @@ g.maplocalleader = " "
 --
 --  Terminal
 --
+
 if vim.loop.os_uname().sysname == "Windows_NT" then
     opt.shell = "powershell"
 else
     opt.shell = "/usr/bin/fish"
 end
 keymap('t', "jk", "<C-\\><C-n>", map_options)
-
-cmd [[ nnoremap T :split<bar>term<cr><c-w>J:resize10<cr> ]]
-
+keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 --
 --  Plugin configs
@@ -219,13 +224,22 @@ cmd [[ nnoremap T :split<bar>term<cr><c-w>J:resize10<cr> ]]
     nnoremap <silent><nowait> gn :<C-u>CocList diagnostics<cr>
 ]]
 
---  Lightline
+--  Statusline
 --
-cmd [[
-    let g:lightline = {
-        \ 'colorscheme': 'sonokai',
-        \ }
-]]
+require("lualine").setup {
+    options = {
+        icons_enabled = false,
+        theme = "auto",
+        component_separators = {
+            left = '|',
+            right = '|',
+        },
+        section_separators = {
+            left = "",
+            right = "",
+        }
+    }
+}
 
 
 --  TreeSitter config
@@ -251,6 +265,9 @@ require("nvim-treesitter.configs").setup {
 require("neo-tree").setup({
     close_if_last_window = true,
     default_component_configs = {
+        container = {
+            enable_character_fade = false,
+        },
         icon = {
             folder_empty = '',
             default = ''
@@ -263,6 +280,13 @@ require("neo-tree").setup({
     },
     enable_git_status = true,
     enable_diagnostics = true,
+    git_status = {
+        symbols = {
+            added = "",
+            modified = "",
+            unstaged = "",
+        }
+    },
     sort_case_insensitive = true,
     source_selector = {
         winbar = true,
@@ -273,17 +297,16 @@ require("neo-tree").setup({
     }
 })
 
-cmd [[
-    nnoremap <C-t> :Neotree toggle<cr> 
-    nnoremap <C-n> :Neotree focus<cr>
-]]
+keymap('n', '<C-t>', ":Neotree toggle<cr>", map_options)
+keymap('n', '<C-n>', ":Neotree focus<cr>", map_options)
 
 --  Autosave plugin
 --
 
 require("auto-save").setup {
-    -- your config goes here
-    -- or just leave it empty :)
+    execution_message = {
+        message = ""
+    }
 }
 
 --  
@@ -351,8 +374,10 @@ local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protoco
 --
 
 keymap('n', "<leader>e", vim.diagnostic.open_float, map_options)
-keymap('n', "ő", vim.diagnostic.goto_prev, map_options)
+keymap('n', "ő", vim.diagnostic.goto_prev, map_options)     --  Since I'm using a Hungarian keyboard layout, it's easier for me to use these characters
+keymap('n', "[", vim.diagnostic.goto_prev, map_options)     --  But I do put these in as well as an option
 keymap('n', "ú", vim.diagnostic.goto_next, map_options)
+keymap('n', "]", vim.diagnostic.goto_next, map_options)
 
 local on_attach = function(client, bufnr)
     api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
