@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.10.13
+--  Last edit: 2022.11.13
 --
 
 local fn = vim.fn
@@ -35,11 +35,11 @@ local function load_plugins()
         --  Colorscheme
         use 'sainnhe/sonokai'
 
+        --  Icons
+        use 'kyazdani42/nvim-web-devicons'
+
         --  Statusline
-        use {
-            'nvim-lualine/lualine.nvim',
-            requires = { 'kyazdani42/nvim-web-devicons', opt = true }
-        }
+        use 'nvim-lualine/lualine.nvim'
 
         --  File manager
         use {
@@ -47,7 +47,6 @@ local function load_plugins()
             branch = "v2.x",
             requires = {
                 "nvim-lua/plenary.nvim",
-                --"kyazdani42/nvim-web-devicons", -- not strictly required, but recommended
                 "MunifTanjim/nui.nvim",
             }
         }
@@ -58,12 +57,25 @@ local function load_plugins()
             run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
         }
 
+        --  Telescope
+        use {
+            'nvim-telescope/telescope.nvim', 
+            tag = '0.1.0',
+            requires = { 
+              {'nvim-lua/plenary.nvim'} 
+            }
+        }
+
         --  CoC
         --[[use {
             'neoclide/coc.nvim',
             branch = 'master',
             run = 'yarn install --frozen-lockfile'
         }]]
+
+        --  AutoPairs
+        use "windwp/nvim-autopairs"
+        
 
         -- LSP
         use 'neovim/nvim-lspconfig'
@@ -73,6 +85,10 @@ local function load_plugins()
         use 'hrsh7th/cmp-path' 
         use 'hrsh7th/cmp-cmdline'
         use 'L3MON4D3/LuaSnip'
+
+        -- Language specific plugins
+        use "elkowar/yuck.vim"
+        use "Decodetalkers/csharpls-extended-lsp.nvim" 
 
         --  Autosave (might remove this, because we can replicate it with autocmds)
         use 'Pocco81/auto-save.nvim'
@@ -112,6 +128,7 @@ opt.wrap = false
 opt.signcolumn = "number"
 opt.scrolloff = 7
 opt.swapfile = false
+opt.laststatus = 3
 
 if fn.has("termguicolors") then
     opt.termguicolors = true
@@ -134,18 +151,6 @@ keymap('i', 'jk', "<esc>", map_options)
 --  Jump to the start or to the end of the line
 keymap('i', '<C-A>', "<esc>A", map_options)
 keymap('i', '<C-E>', "<esc>I", map_options)
-
---  Auto-close brackets
---keymap('i', '"', '""<left>', map_options)
---keymap('i', "'", "''<left>", map_options)
-keymap('i', '(', "()<left>", map_options)
-keymap('i', '()', "()", map_options)
-keymap('i', '[', "[]<left>", map_options)
-keymap('i', '[]', "[]", map_options)
-keymap('i', '{', "{}<left>", map_options)
-keymap('i', '{}', "{}", map_options)
-keymap('i', '{<CR>', "{<CR>}<ESC>O", map_options)
-keymap('i', '{;<CR>', "{<CR>};<ESC>O", map_options)
 
 --
 --  Normal mode
@@ -226,6 +231,7 @@ keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 --  Statusline
 --
+
 require("lualine").setup {
     options = {
         icons_enabled = false,
@@ -237,8 +243,23 @@ require("lualine").setup {
         section_separators = {
             left = "",
             right = "",
-        }
-    }
+        },
+    },
+    extensions = {
+        "neo-tree",
+    },
+    -- tabline = {
+    --     lualine_a = { 
+    --         { 
+    --             "tabs",
+    --             mode = 1,
+    --         } },
+    --     lualine_b = {},
+    --     lualine_c = {},
+    --     lualine_x = {},
+    --     lualine_y = {},
+    --     lualine_z = {}
+    -- },
 }
 
 
@@ -268,6 +289,21 @@ require("neo-tree").setup({
         container = {
             enable_character_fade = false,
         },
+        git_status = {
+            symbols = {
+                -- Change type
+                added     = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+                modified  = "", -- or "", but this is redundant info if you use git_status_colors on the name
+                deleted   = "",-- this can only be used in the git_status source
+                renamed   = "r",-- this can only be used in the git_status source
+                -- Status type
+                untracked = "?",
+                ignored   = ".",
+                unstaged  = "",
+                staged    = "+",
+                conflict  = "c",
+            }    
+        },
         icon = {
             folder_empty = '',
             default = ''
@@ -280,13 +316,6 @@ require("neo-tree").setup({
     },
     enable_git_status = true,
     enable_diagnostics = true,
-    git_status = {
-        symbols = {
-            added = "",
-            modified = "",
-            unstaged = "",
-        }
-    },
     sort_case_insensitive = true,
     source_selector = {
         winbar = true,
@@ -309,6 +338,17 @@ require("auto-save").setup {
     }
 }
 
+--  Telescope
+--
+require('telescope').setup()
+
+--  AutoPairs
+--
+
+require("nvim-autopairs").setup {
+
+}
+
 --  
 --  LSP
 --
@@ -316,6 +356,7 @@ require("auto-save").setup {
 --  cmp
 --
 local cmp = require("cmp")
+local cmp_autopairs = require('nvim-autopairs.completion.cmp')
 
 opt.completeopt = {'menu', 'menuone', 'noselect'}
 
@@ -352,6 +393,11 @@ cmp.setup {
     }),
 }
 
+cmp.event:on(
+    'confirm_done',
+    cmp_autopairs.on_confirm_done()
+)
+
 cmp.setup.cmdline('/', {
     mapping = cmp.mapping.preset.cmdline(),
     sources = {
@@ -368,7 +414,7 @@ cmp.setup.cmdline(':', {
     })
 })
 
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 --  LSP itself
 --
@@ -385,11 +431,12 @@ local on_attach = function(client, bufnr)
     local bufopts = { noremap = true, silent = true, buffer = bufnr }
     
     keymap('n', "K", vim.lsp.buf.hover, bufopts)
-    keymap('n', "<C-k>", vim.lsp.buf.signature_help, bufopts)
+    --keymap('n', "<C-K>", vim.lsp.buf.signature_help, bufopts)
     keymap('n', "gD", vim.lsp.buf.declaration, bufopts)
     keymap('n', "gd", vim.lsp.buf.definition, bufopts)
     keymap('n', "gi", vim.lsp.buf.implementation, bufopts)
     keymap('n', "gr", vim.lsp.buf.references, bufopts)
+    keymap('n', "<leader>r", vim.lsp.buf.rename, bufopts)
     keymap('n', "<leader><return>", vim.lsp.buf.code_action, bufopts)
 end
 
@@ -417,7 +464,11 @@ require('lspconfig')["clangd"].setup {
 --  C#
 require('lspconfig')["csharp_ls"].setup {
     on_attach = on_attach,
-    capabilities = capabilities 
+    capabilities = capabilities,
+    handlers = {
+        ["textDocument/definition"] = require('csharpls_extended').handler,
+    },
+    --cmd = { "csharpls" },
 }
 
 --  R 
