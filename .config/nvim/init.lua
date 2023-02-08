@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2022.11.13
+--  Last edit: 2023.02.08
 --
 
 local fn = vim.fn
@@ -73,11 +73,26 @@ local function load_plugins()
             run = 'yarn install --frozen-lockfile'
         }]]
 
+        --  Better start screen
+        use "mhinz/vim-startify"
+
         --  AutoPairs
         use "windwp/nvim-autopairs"
+
+        --  View git diffs in vim
+        use {
+            'sindrets/diffview.nvim',
+            requires = 'nvim-lua/plenary.nvim'
+        }
+
+        --  Magit for neovim
+        use {
+            'TimUntersberger/neogit',
+            requires = 'nvim-lua/plenary.nvim'
+        }
         
 
-        -- LSP
+        --  LSP
         use 'neovim/nvim-lspconfig'
         use 'hrsh7th/nvim-cmp'
         use 'hrsh7th/cmp-nvim-lsp'
@@ -86,7 +101,7 @@ local function load_plugins()
         use 'hrsh7th/cmp-cmdline'
         use 'L3MON4D3/LuaSnip'
 
-        -- Language specific plugins
+        --  Language specific plugins
         use "elkowar/yuck.vim"
         use "Decodetalkers/csharpls-extended-lsp.nvim" 
 
@@ -137,7 +152,7 @@ end
 cmd [[ colorscheme sonokai ]]
 
 --
---  Keymaps
+--  Quality of life improving keybindings
 --
 
 local map_options = { noremap = true, silent = true }
@@ -160,8 +175,9 @@ keymap('n', '<C-h>', "<C-w>h", map_options)
 keymap('n', '<C-j>', "<C-w>j", map_options)
 keymap('n', '<C-k>', "<C-w>k", map_options)
 keymap('n', '<C-l>', "<C-w>l", map_options)
+keymap('n', '<C-y>', "<esc>ggVGy<C-o>", map_options)
 
---  Quickly open this config file
+--  Quickly open this config file (TODO: fix it for Windows)
 if vim.loop.os_uname().sysname == "Linux" then
     keymap('n', "<F12>", ":e ~/.config/nvim/init.lua<cr>", map_options)
 end
@@ -177,6 +193,12 @@ keymap('n', 'k', "gk", map_options)
 keymap('v', '/', "y/<C-r><C-0><return><esc>", map_options)
 
 --
+--  Terminal mode
+
+--  Escape from insert mode in terminal with the same keychord as from regular insert mode
+keymap('t', "jk", "<C-\\><C-n>", map_options)
+
+--
 --  General
 
 keymap('', 'é', '$', map_options)
@@ -188,7 +210,7 @@ g.maplocalleader = " "
 
 
 --
---  Terminal
+--  Integrated terminal
 --
 
 if vim.loop.os_uname().sysname == "Windows_NT" then
@@ -196,7 +218,8 @@ if vim.loop.os_uname().sysname == "Windows_NT" then
 else
     opt.shell = "/usr/bin/fish"
 end
-keymap('t', "jk", "<C-\\><C-n>", map_options)
+
+--  Open a little terminal at the bottom of the screen. (Like in VSCode)
 keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 --
@@ -205,6 +228,8 @@ keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 --  CoC config
 --
+
+--  I left my CoC config in here in case we need it for some reason
 
 --[[cmd [[
     "   Jump between suggestions
@@ -229,7 +254,21 @@ keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
     nnoremap <silent><nowait> gn :<C-u>CocList diagnostics<cr>
 ]]
 
---  Statusline
+--  Star screen (startify)
+--
+
+cmd [[ 
+    let g:startify_custom_header = [
+        \ ' ███╗   ██╗ ███████╗ ██████╗  ██╗   ██╗ ██╗ ███╗   ███╗',
+        \ ' ████╗  ██║ ██╔════╝██╔═══██╗ ██║   ██║ ██║ ████╗ ████║',
+        \ ' ██╔██╗ ██║ █████╗  ██║   ██║ ██║   ██║ ██║ ██╔████╔██║',
+        \ ' ██║╚██╗██║ ██╔══╝  ██║   ██║ ╚██╗ ██╔╝ ██║ ██║╚██╔╝██║',
+        \ ' ██║ ╚████║ ███████╗╚██████╔╝  ╚████╔╝  ██║ ██║ ╚═╝ ██║',
+        \ ' ╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝',
+        \]
+]]
+
+--  Statusline (lualine)
 --
 
 require("lualine").setup {
@@ -248,18 +287,6 @@ require("lualine").setup {
     extensions = {
         "neo-tree",
     },
-    -- tabline = {
-    --     lualine_a = { 
-    --         { 
-    --             "tabs",
-    --             mode = 1,
-    --         } },
-    --     lualine_b = {},
-    --     lualine_c = {},
-    --     lualine_x = {},
-    --     lualine_y = {},
-    --     lualine_z = {}
-    -- },
 }
 
 
@@ -292,10 +319,10 @@ require("neo-tree").setup({
         git_status = {
             symbols = {
                 -- Change type
-                added     = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
-                modified  = "", -- or "", but this is redundant info if you use git_status_colors on the name
-                deleted   = "",-- this can only be used in the git_status source
-                renamed   = "r",-- this can only be used in the git_status source
+                added     = "",
+                modified  = "",
+                deleted   = "",
+                renamed   = "r",
                 -- Status type
                 untracked = "?",
                 ignored   = ".",
@@ -327,7 +354,8 @@ require("neo-tree").setup({
 })
 
 keymap('n', '<C-t>', ":Neotree toggle<cr>", map_options)
-keymap('n', '<C-n>', ":Neotree focus<cr>", map_options)
+keymap('n', '<f8>', ":Neotree toggle<cr>", map_options)
+keymap('n', '<C-f8>', ":Neotree focus<cr>", map_options)
 
 --  Autosave plugin
 --
@@ -340,21 +368,17 @@ require("auto-save").setup {
 
 --  Telescope
 --
+
 require('telescope').setup()
 
 --  AutoPairs
 --
 
-require("nvim-autopairs").setup {
+require("nvim-autopairs").setup()
 
-}
-
---  
---  LSP
+--  Cmp
 --
 
---  cmp
---
 local cmp = require("cmp")
 local cmp_autopairs = require('nvim-autopairs.completion.cmp')
 
@@ -416,7 +440,7 @@ cmp.setup.cmdline(':', {
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
---  LSP itself
+--  LSP
 --
 
 keymap('n', "<leader>e", vim.diagnostic.open_float, map_options)
@@ -430,8 +454,8 @@ local on_attach = function(client, bufnr)
 
     local bufopts = { noremap = true, silent = true, buffer = bufnr }
     
-    keymap('n', "K", vim.lsp.buf.hover, bufopts)
-    --keymap('n', "<C-K>", vim.lsp.buf.signature_help, bufopts)
+    keymap('n', "<leader>K", vim.lsp.buf.hover, bufopts)
+    keymap('n', "<leader>k", vim.lsp.buf.signature_help, bufopts)
     keymap('n', "gD", vim.lsp.buf.declaration, bufopts)
     keymap('n', "gd", vim.lsp.buf.definition, bufopts)
     keymap('n', "gi", vim.lsp.buf.implementation, bufopts)
@@ -440,17 +464,29 @@ local on_attach = function(client, bufnr)
     keymap('n', "<leader><return>", vim.lsp.buf.code_action, bufopts)
 end
 
+--  DiffView
+--
+
+require("diffview").setup()
+
+--  NeoGit
+--
+
+local neogit = require("neogit")
+neogit.setup {
+    integrations = {
+        diffview = true
+    }
+}
+
+keymap('n', "<leader>g", neogit.open, bufopts)
+
+--
 --  Language servers
 --
 
 --  Python
 require('lspconfig')["pyright"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-}
-
---  Java
-require('lspconfig')["jdtls"].setup {
     on_attach = on_attach,
     capabilities = capabilities,
 }
@@ -469,10 +505,4 @@ require('lspconfig')["csharp_ls"].setup {
         ["textDocument/definition"] = require('csharpls_extended').handler,
     },
     --cmd = { "csharpls" },
-}
-
---  R 
-require('lspconfig')["r_language_server"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities
 }
