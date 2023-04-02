@@ -20,12 +20,14 @@
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
+;; Initialize use-package
+(require 'use-package)
+(setq use-package-always-ensure t)
+
 ;;; Very basic packages
 
 ;; Diminish modes from showing up in the modeline
 (use-package diminish) 
-
-
 
 ;;; Basic settings
 
@@ -85,10 +87,6 @@
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 40)))
 
-;; Initialize use-package
-(require 'use-package)
-(setq use-package-always-ensure t)
-
 ;; Ivy trio (for better command completition)
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
@@ -112,7 +110,7 @@
          ("TAB" . ivy-done)
          :map ivy-reverse-i-search-map
          ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
+         ("C-d" . ivy-reverse-i-search-kill)))
 
 ;; Richer and more friendly interface for Ivy
 (use-package ivy-rich
@@ -121,4 +119,27 @@
 ;; Which Key
 (use-package which-key
   :init (which-key-mode t)
-  :custom ((which-key-idle-delay 0.5))
+  :custom ((which-key-idle-delay 0.5)))
+
+;; A fancier dashboard
+(use-package dashboard
+  :config (dashboard-setup-startup-hook)
+  :custom ((initial-buffer-choice (lambda() (get-buffer-create "*dashboard*"))) ; For Emacsclient windows
+           (dashboard-startup-banner 'logo)
+           (dashboard-center-content t)
+           (dashboard-items '((recents . 5)
+                              (projects . 5)
+                              (bookmarks . 5)
+                              (agenda . 5)))))
+
+;;; Plugins for development
+
+;; Projectile
+(use-package projectile
+  :diminish projectile-mode
+  :init (projectile-mode)
+  :custom ((projectilel-completion-system 'ivy))
+  :bind-keymap ("C-c p" . projectile-command-map))
+
+;; Magit
+(use-package magit)
