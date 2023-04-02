@@ -34,6 +34,11 @@
 ;; Use spaces instead of tabs for indentation
 (setq-default indent-tabs-mode nil)
 
+;; Use 4 space tabs by default
+(setq-default tab-width 4)
+
+(setq indent-line-function 'insert-tab)
+
 ;; Use ESC to quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -82,6 +87,11 @@
 ;; All the icons
 (use-package all-the-icons
   :if (display-graphic-p))
+
+;; Let dired have some icons
+(use-package all-the-icons-dired
+  :config
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
 ;; Doom modeline
 (use-package doom-modeline
@@ -133,25 +143,15 @@
                               (bookmarks . 5)
                               (agenda . 5)))))
 
-;;; Plugins for development
-
-;; Projectile
-(use-package projectile
-  :diminish projectile-mode
-  :init (projectile-mode)
-  :custom ((projectilel-completion-system 'ivy))
-  :bind-keymap ("C-c p" . projectile-command-map))
-
-;; Magit
-(use-package magit)
-
 ;;; Org mode
 
 ;; The package
 (use-package org
   :hook (org-mode . (lambda()
                       (org-indent-mode)
-                      (visual-line-mode 1))))
+                      (visual-line-mode 1)))
+  :custom ((org-directory "~/pCloudDrive/OrgNotes/")
+           (org-agenda-files (list org-directory))))
 
 ;; Have variable size headings
 (dolist (face '((org-level-1 . 1.5)
@@ -168,3 +168,42 @@
   :after (org)
   :hook (org-mode . org-bullets-mode)
   :custom (org-bullets-bullet-list '("▸")))
+
+;;; Plugins for development
+
+;; Projectile
+(use-package projectile
+  :diminish projectile-mode
+  :init (projectile-mode)
+  :custom ((projectilel-completion-system 'ivy))
+  :bind-keymap ("C-c p" . projectile-command-map))
+
+;; Magit
+(use-package magit)
+
+;; LSP mode
+(use-package lsp-mode
+  :custom (lsp-keymap-prefix "C-l")
+  :hook ((c-mode . lsp-deferred)
+         (python-mode . lsp-deferred)
+         (elisp-mode . lsp-deferred))
+  :commands (lsp lsp-deferred))
+
+(use-package lsp-ui
+  :commands (lsp-ui-mode))
+
+(use-package lsp-ivy
+  :commands lsp-ivy-workspace-symbol)
+
+(use-package company
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-common-or-cycle)
+         ;("<backtab>" . company-complete-common-or-cycle-1)
+         ("<backtab>" . company-select-previous))
+  :custom ((company-idle-delay 0.0)
+           (company-minimum-prefix-length 1)))
+
+(use-package tree-sitter
+  :config
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
