@@ -68,15 +68,16 @@
 
 ; Disable line numbers for some modes
 (dolist (mode '(term-mode-hook
-                eshell-mode-hook))
+                eshell-mode-hook
+                org-mode-hook))
   (add-hook mode (lambda() (display-line-numbers-mode 0))))
 
 ;; Theme
 (use-package doom-themes
-  :custom ((doom-themes-enable-bold t)
-           (doom-themes-enable-italic t))
   :config
-  (load-theme 'doom-one t))
+  (setq doom-themes-enable-bold t)
+  (setq doom-themes-enable-italic t))
+  (load-theme 'doom-one t)
 
 ;; All the icons
 (use-package all-the-icons
@@ -90,7 +91,7 @@
 ;; Ivy trio (for better command completition)
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
-         ("C-x b" . counsel-ibuffer)
+         ;("C-x b" . counsel-ibuffer)
          ("C-x f" . counsel-find-file))
   :custom ((ivy-initial-inputs-alist nil)))  ; Don't start ivy searches with ^ (mostly significant for M-x)
 
@@ -143,3 +144,27 @@
 
 ;; Magit
 (use-package magit)
+
+;;; Org mode
+
+;; The package
+(use-package org
+  :hook (org-mode . (lambda()
+                      (org-indent-mode)
+                      (visual-line-mode 1))))
+
+;; Have variable size headings
+(dolist (face '((org-level-1 . 1.5)
+                (org-level-2 . 1.4)
+                (org-level-3 . 1.3)
+                (org-level-4 . 1.2)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :height (cdr face)))
+
+(use-package org-bullets
+  :after (org)
+  :hook (org-mode . org-bullets-mode)
+  :custom (org-bullets-bullet-list '("▸")))
