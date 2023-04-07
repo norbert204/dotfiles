@@ -241,3 +241,31 @@
 (use-package lsp-pyright
   :hook (python-mode . (lambda() (require 'lsp-pyright)
                           (lsp-deferred))))
+
+;;;
+;;; Evil (Because I like VIM)
+;;;
+
+;; Keychords first
+;(use-package key-chord
+;  :config (key-chord-mode 1))
+;
+;;; Evil itself
+;(use-package evil
+;  :init (setq evil-want-keybinding nil)
+;  :custom ((evil-shift-width tab-width)
+;           (evil-shift-round t)
+;           (evil-split-window-below t)
+;           (evil-split-window-right t))
+;  :config
+;  (evil-mode)
+;  (evil-global-set-key 'normal (kbd "C-r") 'undo-redo)
+;  (define-key evil-normal-state-map (kbd "é") "$")
+;  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
+;
+;;; Evil collection for other plugins
+;(use-package evil-collection
+;  :after evil
+;  :custom (evil-collection-mode list (magit))
+;  :config
+;  (evil-collection-init))
