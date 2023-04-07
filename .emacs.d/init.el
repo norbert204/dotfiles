@@ -223,7 +223,6 @@
 (use-package company
   :bind (:map company-active-map
          ("<tab>" . company-complete-common-or-cycle)
-         ;("<backtab>" . company-complete-common-or-cycle-1)
          ("<backtab>" . company-select-previous))
   :custom ((company-idle-delay 0.0)
            (company-minimum-prefix-length 1)))
