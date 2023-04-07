@@ -29,7 +29,12 @@
 ;; Diminish modes from showing up in the modeline
 (use-package diminish) 
 
+;;;
 ;;; Basic settings
+;;;
+
+;; Use UTF-8
+(set-language-environment "UTF-8")
 
 ;; Use spaces instead of tabs for indentation
 (setq-default indent-tabs-mode nil)
@@ -37,7 +42,11 @@
 ;; Use 4 space tabs by default
 (setq-default tab-width 4)
 
+;; Please use spaces instead of tab character
 (setq indent-line-function 'insert-tab)
+
+;; A bit more friendly shortcut to insert a literal tab
+(global-set-key (kbd "C-<tab>") 'tab-to-tab-stop)
 
 ;; Use ESC to quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -45,7 +54,20 @@
 ;; Disable backup files
 (setq make-backup-files nil)
 
+;; Disable line wrapping
+(setq-default truncate-lines t)
+
+;; Somewhat smooth scrolling when using keyboard
+;; It's beyond me why achieving some sort of smooth scrolling in Emacs is so difficult and hacky.
+(setq redisplay-dont-pause t
+  scroll-margin 7
+  scroll-step 1
+  scroll-conservatively 10
+  scroll-preserve-screen-position 1)
+
+;;;
 ;;; UI
+;;;
 
 ;; Disable start screen
 ; (setq inhibit-startup-message t)
@@ -143,7 +165,9 @@
                               (bookmarks . 5)
                               (agenda . 5)))))
 
+;;;
 ;;; Org mode
+;;;
 
 ;; The package
 (use-package org
@@ -169,7 +193,9 @@
   :hook (org-mode . org-bullets-mode)
   :custom (org-bullets-bullet-list '("▸")))
 
+;;;
 ;;; Plugins for development
+;;;
 
 ;; Projectile
 (use-package projectile
