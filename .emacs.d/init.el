@@ -185,8 +185,7 @@
 (use-package lsp-mode
   :custom (lsp-keymap-prefix "C-l")
   :hook ((c-mode . lsp-deferred)
-         (python-mode . lsp-deferred)
-         (elisp-mode . lsp-deferred))
+         (csharp-mode . lsp-deferred))
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
@@ -207,3 +206,13 @@
   :config
   (global-tree-sitter-mode)
   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs)
+(use-package tree-sitter-indent)
+
+;; Language specific LSP plugins
+
+; Python
+(use-package lsp-pyright
+  :hook (python-mode . (lambda() (require 'lsp-pyright)
+                          (lsp-deferred))))
