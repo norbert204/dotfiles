@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2023.02.08
+--  Last edit: 2023.06.11
 --
 
 local fn = vim.fn
@@ -34,6 +34,7 @@ local function load_plugins()
 
         --  Colorscheme
         use 'sainnhe/sonokai'
+        use "folke/tokyonight.nvim"
 
         --  Icons
         use 'kyazdani42/nvim-web-devicons'
@@ -66,6 +67,15 @@ local function load_plugins()
             }
         }
 
+        --  Plugins for Telescope
+        use "nvim-telescope/telescope-ui-select.nvim"
+
+        --  Toggle terminal
+        use {
+            "akinsho/toggleterm.nvim",
+            tag='*'
+        }
+
         --  CoC
         --[[use {
             'neoclide/coc.nvim',
@@ -75,6 +85,16 @@ local function load_plugins()
 
         --  Better start screen
         use "mhinz/vim-startify"
+
+        --  Better looking tabs
+        --use 'nanozuki/tabby.nvim'
+        use {
+            'romgrk/barbar.nvim',
+            requires = {
+                'nvim-tree/nvim-web-devicons',
+                'lewis6991/gitsigns.nvim',
+            }
+        }
 
         --  AutoPairs
         use "windwp/nvim-autopairs"
@@ -149,7 +169,7 @@ if fn.has("termguicolors") then
     opt.termguicolors = true
 end
 
-cmd [[ colorscheme sonokai ]]
+cmd [[ colorscheme tokyonight-moon ]]
 
 --
 --  Quality of life improving keybindings
@@ -220,7 +240,7 @@ else
 end
 
 --  Open a little terminal at the bottom of the screen. (Like in VSCode)
-keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
+--keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 --
 --  Plugin configs
@@ -259,12 +279,13 @@ keymap('n', 'T', ":split<bar>term<cr><c-w>J:resize10<cr>", map_options)
 
 cmd [[ 
     let g:startify_custom_header = [
-        \ ' ███╗   ██╗ ███████╗ ██████╗  ██╗   ██╗ ██╗ ███╗   ███╗',
-        \ ' ████╗  ██║ ██╔════╝██╔═══██╗ ██║   ██║ ██║ ████╗ ████║',
-        \ ' ██╔██╗ ██║ █████╗  ██║   ██║ ██║   ██║ ██║ ██╔████╔██║',
-        \ ' ██║╚██╗██║ ██╔══╝  ██║   ██║ ╚██╗ ██╔╝ ██║ ██║╚██╔╝██║',
-        \ ' ██║ ╚████║ ███████╗╚██████╔╝  ╚████╔╝  ██║ ██║ ╚═╝ ██║',
-        \ ' ╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝',
+        \ '',
+        \ '   ███╗   ██╗ ███████╗ ██████╗  ██╗   ██╗ ██╗ ███╗   ███╗',
+        \ '   ████╗  ██║ ██╔════╝██╔═══██╗ ██║   ██║ ██║ ████╗ ████║',
+        \ '   ██╔██╗ ██║ █████╗  ██║   ██║ ██║   ██║ ██║ ██╔████╔██║',
+        \ '   ██║╚██╗██║ ██╔══╝  ██║   ██║ ╚██╗ ██╔╝ ██║ ██║╚██╔╝██║',
+        \ '   ██║ ╚████║ ███████╗╚██████╔╝  ╚████╔╝  ██║ ██║ ╚═╝ ██║',
+        \ '   ╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝',
         \]
 ]]
 
@@ -294,7 +315,7 @@ require("lualine").setup {
 --
 
 require("nvim-treesitter.configs").setup {
-    ensure_installed = { "c", "java", "lua", "python" },
+    ensure_installed = { "c", "lua", "python" },
     sync_install = false,
     auto_install = true,
     highlight = {
@@ -354,9 +375,63 @@ require("neo-tree").setup({
 })
 
 keymap('n', '<C-t>', ":Neotree toggle<cr>", map_options)
-keymap('n', '<f8>', ":Neotree toggle<cr>", map_options)
-keymap('n', '<C-f8>', ":Neotree focus<cr>", map_options)
+--keymap('n', '<C-T>', ":Neotree focus<cr>", map_options)
 
+--  Better tabs
+--
+
+--[[require('tabby.tabline').set(function(line)
+    local theme = {
+        fill = 'TabLineFill',
+        head = 'TabLine',
+        current_tab = 'TabLineSel',
+        tab = 'TabLine',
+        win = 'TabLine',
+        tail = 'TabLine',
+    }
+
+    return {
+        line.tabs().foreach(function(tab)
+            local hl = tab.is_current() and theme.current_tab or theme.tab
+            return {
+                line.sep('', hl, theme.tab),
+                tab.number(),
+                tab.name(),
+                -- line.sep('', hl, theme.fill ),
+                line.sep('', hl, theme.tab),
+                hl = hl,
+                margin = ' ',
+            }
+        end)
+    }
+end)]]
+
+require("barbar").setup {
+    auto_hide = true,
+    icons = {
+        separator = {
+            left = '',
+            right = '',
+        },
+        separator_at_end = false,
+    }
+}
+
+keymap('n', '<A-0>', '<Cmd>BufferGoto 1<CR>', opts)
+keymap('n', '<A-1>', '<Cmd>BufferGoto 2<CR>', opts)
+keymap('n', '<A-2>', '<Cmd>BufferGoto 3<CR>', opts)
+keymap('n', '<A-3>', '<Cmd>BufferGoto 4<CR>', opts)
+keymap('n', '<A-4>', '<Cmd>BufferGoto 5<CR>', opts)
+keymap('n', '<A-5>', '<Cmd>BufferGoto 6<CR>', opts)
+keymap('n', '<A-6>', '<Cmd>BufferGoto 7<CR>', opts)
+keymap('n', '<A-7>', '<Cmd>BufferGoto 8<CR>', opts)
+keymap('n', '<A-8>', '<Cmd>BufferGoto 9<CR>', opts)
+keymap('n', '<A-9>', '<Cmd>BufferLast<CR>', opts)
+keymap('n', '<A-p>', '<Cmd>BufferPin<CR>', opts)
+keymap('n', '<A-c>', '<Cmd>BufferClose<CR>', opts)
+
+keymap('n', '<A-b>', '<Cmd>Telescope buffers<CR>', opts)
+             
 --  Autosave plugin
 --
 
@@ -369,7 +444,35 @@ require("auto-save").setup {
 --  Telescope
 --
 
-require('telescope').setup()
+local telescope = require('telescope')
+local telescope_builtin = require('telescope.builtin')
+local telescope_themes = require("telescope.themes")
+
+telescope.setup {
+    defaults = {
+        mappings = {
+            i = {
+                ["<C-j>"] = "move_selection_next",
+                ["<C-k>"] = "move_selection_previous"
+            }
+        }
+    },
+    extensions = {
+        ["ui-select"] = {
+            telescope_themes.get_dropdown(),
+        }
+    }
+}
+
+telescope.load_extension("ui-select")
+
+--  ToggleTerm
+--
+
+require("toggleterm").setup {
+    size = 10,
+}
+keymap('n', '<leader>t', ":ToggleTerm<CR>", map_options)
 
 --  AutoPairs
 --
@@ -457,9 +560,9 @@ local on_attach = function(client, bufnr)
     keymap('n', "<leader>K", vim.lsp.buf.hover, bufopts)
     keymap('n', "<leader>k", vim.lsp.buf.signature_help, bufopts)
     keymap('n', "gD", vim.lsp.buf.declaration, bufopts)
-    keymap('n', "gd", vim.lsp.buf.definition, bufopts)
-    keymap('n', "gi", vim.lsp.buf.implementation, bufopts)
-    keymap('n', "gr", vim.lsp.buf.references, bufopts)
+    keymap('n', "gd", telescope_builtin.lsp_definitions, bufopts)
+    keymap('n', "gi", telescope_builtin.lsp_implementations, bufopts)
+    keymap('n', "gr", telescope_builtin.lsp_references, bufopts)
     keymap('n', "<leader>r", vim.lsp.buf.rename, bufopts)
     keymap('n', "<leader><return>", vim.lsp.buf.code_action, bufopts)
 end
@@ -491,7 +594,7 @@ require('lspconfig')["pyright"].setup {
     capabilities = capabilities,
 }
 
---  C
+--  C/C++
 require('lspconfig')["clangd"].setup {
     on_attach = on_attach,
     capabilities = capabilities,
@@ -505,4 +608,10 @@ require('lspconfig')["csharp_ls"].setup {
         ["textDocument/definition"] = require('csharpls_extended').handler,
     },
     --cmd = { "csharpls" },
+}
+
+--  Rust
+require('lspconfig')["rust_analyzer"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
 }
