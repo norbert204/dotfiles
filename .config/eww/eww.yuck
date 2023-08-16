@@ -1,0 +1,6 @@
+(include "./bar/bar.yuck")
+(include "./dropdown/dropdown.yuck")
+
+(defpoll pl-volume-icon
+  :interval "1s"
+  "./scripts/volume_icon.sh")

@@ -1,0 +1,94 @@
+;;;
+;;;   Variables
+;;;
+
+(defpoll pl-volume
+  :interval "1s"
+  "./scripts/volume.sh")
+
+(defpoll pl-brightness
+  :interval "1s"
+  "./scripts/brightness.sh")
+
+;;;
+;;;   Widgets
+;;;
+
+(defwidget sound []
+  (box :orientation "horizontal"
+       :space-evenly true
+       :spacing 4
+       (button :onclick "pulsemixer --toggle-mute"
+               (label :class "icon"
+                      :text "${pl-volume-icon}"))
+       (scale :round-digits 1
+              :min 0
+              :max 101
+              :value "${pl-volume}"
+              :timeout "1000ms"
+              :onchange "pulsemixer --set-volume {}")
+       (label :text "${pl-volume}%")))
+
+(defwidget brightness []
+  (box :orientation "horizontal"
+       :space-evenly true
+       :spacing 4
+       (label :class "icon"
+              :text "󰃟")
+       (scale :round-digits 1
+              :min 0
+              :max 101
+              :value "${pl-brightness}"
+              :timeout "1000ms"
+              :onchange "brightnessctl s {}%")
+       (label :text "${pl-brightness}%")))
+
+(defwidget cal []
+  (calendar :show-heading true
+            :show-day-names true
+            :show-details true))
+
+(defwidget powermenu-poweroff []
+  (button :onclick "poweroff"
+          :tooltip "power off"
+          :class "btn-powermenu"
+          (label :class "btn-powermenu-text btn-poweroff"
+                 :text "")))
+
+(defwidget powermenu-restart []
+  (button :onclick "reboot"
+          :tooltip "reboot"
+          :class "btn-powermenu"
+          (label :class "btn-powermenu-text"
+                 :text "")))
+
+(defwidget powermenu-logout []
+  (button :onclick "hyprctl dispatch exit"
+          :tooltip "logout"
+          :class "btn-powermenu"
+          (label :class "btn-powermenu-text"
+                 :text "󰍃")))
+
+(defwidget powermenu []
+  (box :orientation "horizontal"
+       :space-evenly true
+       (powermenu-logout)
+       (powermenu-restart)
+       (powermenu-poweroff)))
+
+(defwidget container []
+  (box :class "container dropdown"
+       :space-evenly false
+       :orientation "vertical"
+       (calendar)
+       (sound)
+       (brightness)
+       (powermenu)))
+
+(defwindow dropdown
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :anchor "top right")
+  :stacking "fg"
+  (container))

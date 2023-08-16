@@ -1,0 +1,60 @@
+.bar {
+    margin: 6px 6px 6px 6px;
+}
+
+/*
+    Common
+*/
+
+/*
+    Launcher
+*/
+
+.btn-launcher {
+    padding-right: 20px;
+}
+
+.launcher-icon {
+    font-size: 2rem;
+    color: $blue;
+}
+
+/*
+    Workspaces
+*/
+
+.workspace-current {
+    color: $green;
+}
+
+.workspace-button {
+    padding: 0 10px;
+}
+
+/*
+    Battery
+*/
+
+.battery-icon.charging {
+    color: $green;
+}
+.battery-icon.low {
+    color: $red;
+}
+
+/*
+    Screenshot
+*/ 
+
+.btn-screenshot {
+    padding-right: 20px;
+}
+
+
+/*
+    Misc
+*/
+
+.icon {
+    font-size: 1.75rem;
+}

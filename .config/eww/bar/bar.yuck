@@ -1,0 +1,115 @@
+(deflisten ls-active-window
+  :initial "Hyprland"
+  "./scripts/active_window.sh")
+
+(deflisten ls-workspaces
+  :initial ""
+  "./scripts/workspaces.sh")
+
+(defpoll pl-battery
+  :interval "1m"
+  "./scripts/battery.sh")
+
+(defpoll pl-battery-icon
+  :interval "5s"
+  "./scripts/battery_icon.sh")
+
+(defpoll pl-time
+  :interval "5s"
+  "./scripts/time.sh")
+
+
+;;;
+;;;   Widgets
+;;;
+
+(defwidget launcher []
+  (button :class "btn-launcher"
+          :onclick "~/.local/scripts/wl_launcher.sh"
+          (label :class "launcher-icon"
+                 :text "󱓞")))
+
+(defwidget active-window []
+  (label :class "ms-2"
+         :text "${ls-active-window}"))
+
+(defwidget workspaces []
+  (box :space-evenly true
+       (for ws in ls-workspaces
+            (button :onclick "hyprctl dispatch workspace ${ws.id}"
+                    :class "workspace-button"
+                    (label :class "${ws.current ? "workspace-current" : ""}"
+                           :text "${ws.id}")))))
+
+(defwidget battery-status []
+  (box :orientation "horizontal"
+       :class "me-1"
+       :space-evenly false
+       (label :class "icon me-1 battery-icon ${pl-battery-icon == "󰂄" ? "charging" : pl-battery-icon == "" ? "low" : ""}"
+              :text "${pl-battery-icon}")
+       (label :text "${pl-battery}%")))
+
+(defwidget time []
+  (label :class "me-2"
+         :text "${pl-time}"))
+
+(defwidget dropdown-toggle []
+  (button :onclick "./toggle_sidebar.sh"
+          :timeout "1000ms"
+          (label :class "icon"
+                 :text "")))
+
+(defwidget screenshot []
+  (button :onclick "~/.local/scripts/wl_screenshot.sh"
+          :onrightclick "~/.local/scripts/wl_screenshot.sh -s"
+          :class "me-1 btn-screenshot"
+          :tooltip "Take a screenshot"
+          (label :class "icon"
+                 :text "󰹑")))
+
+(defwidget volume-icon []
+  (button :class "me-1"
+          :timeout "1000ms"
+          :onclick "pulsemixer --toggle-mute"
+          :onrightclick "pavucontrol &"
+          (label :class "icon"
+                 :text "${pl-volume-icon}")))
+
+;;;
+;;;   Containers
+;;;
+
+(defwidget bar-left []
+  (box :orientation "h"
+       :halign "start"
+       :space-evenly false
+       (launcher)
+       (workspaces)
+       (active-window)))
+
+(defwidget bar-right []
+  (box :orientation "h"
+       :halign "end"
+       :space-evenly false
+       (screenshot)
+       (volume-icon)
+       (time)
+       (battery-status)
+       (dropdown-toggle)))
+
+(defwidget bar-container []
+  (box :class "bar container"
+       :orientation "h"
+       (bar-left)
+       (bar-right)))
+
+(defwindow bar
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "100%"
+                      :height "36px"
+                      :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  (bar-container))

@@ -1,0 +1,75 @@
+@import "variables";
+@import "bar/bar";
+@import "dropdown/dropdown";
+
+* {
+    all: unset;
+    font-family: "Roboto", "Ubuntu Nerd Font", "Font Awesome 5 Pro";
+    font-size: 16px;
+    font-weight: 500;
+    color: $foreground;
+}
+
+//
+//  Helpers
+//
+
+.me-1 {
+    margin-right: 10px;
+}
+
+.me-2 {
+    margin-right: 20px;
+}
+
+.ms-1 {
+    margin-left: 20px;
+}
+
+.ms-2 {
+    margin-left: 20px;
+}
+
+.container {
+    background-color: $background;
+    padding: 3px;
+    border-radius: 8px;
+    border: 2px solid $border;
+    box-shadow: 0 2px 3px black;
+}
+
+//
+//  Components
+//
+
+tooltip {
+    background-color: black;
+    border-radius: 5px;
+}
+
+button {
+    border-radius: 5px;
+    padding: 2px 10px;
+    transition: background .1s ease-in-out;
+}
+
+button:hover {
+    background-color: #414868;
+}
+
+scale trough {
+    background-color: #24283b;
+    min-height: 8px;
+    border-radius: 4px;
+}
+
+scale slider {
+    background-color: transparent;
+    min-width: 8px;
+    min-height: 8px;
+}
+
+scale trough highlight {
+    background-color: #73daca;
+    border-radius: 4px;
+}
