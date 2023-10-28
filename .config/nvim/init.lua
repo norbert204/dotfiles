@@ -1,6 +1,6 @@
 --
 --  Made by Norbert Horvath (norbert204)
---  Last edit: 2023.06.11
+--  Last edit: 2023.10.28
 --
 
 local fn = vim.fn
@@ -37,7 +37,7 @@ local function load_plugins()
         use "folke/tokyonight.nvim"
 
         --  Icons
-        use 'kyazdani42/nvim-web-devicons'
+        use 'nvim-tree/nvim-web-devicons'
 
         --  Statusline
         use 'nvim-lualine/lualine.nvim'
@@ -55,15 +55,17 @@ local function load_plugins()
         --  Better highlighting
         use {
             'nvim-treesitter/nvim-treesitter',
-            run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
+            run = function()
+                require('nvim-treesitter.install').update({ with_sync = true })
+            end,
         }
 
         --  Telescope
         use {
-            'nvim-telescope/telescope.nvim', 
+            'nvim-telescope/telescope.nvim',
             tag = '0.1.0',
-            requires = { 
-              {'nvim-lua/plenary.nvim'} 
+            requires = {
+                {'nvim-lua/plenary.nvim'}
             }
         }
 
@@ -76,18 +78,10 @@ local function load_plugins()
             tag='*'
         }
 
-        --  CoC
-        --[[use {
-            'neoclide/coc.nvim',
-            branch = 'master',
-            run = 'yarn install --frozen-lockfile'
-        }]]
-
         --  Better start screen
         use "mhinz/vim-startify"
 
         --  Better looking tabs
-        --use 'nanozuki/tabby.nvim'
         use {
             'romgrk/barbar.nvim',
             requires = {
@@ -110,20 +104,25 @@ local function load_plugins()
             'TimUntersberger/neogit',
             requires = 'nvim-lua/plenary.nvim'
         }
-        
+
+        use "lewis6991/gitsigns.nvim"
 
         --  LSP
         use 'neovim/nvim-lspconfig'
         use 'hrsh7th/nvim-cmp'
         use 'hrsh7th/cmp-nvim-lsp'
         use 'hrsh7th/cmp-buffer'
-        use 'hrsh7th/cmp-path' 
+        use 'hrsh7th/cmp-path'
         use 'hrsh7th/cmp-cmdline'
         use 'L3MON4D3/LuaSnip'
 
+        --  LSP extra
+        use 'mfussenegger/nvim-dap'
+        use "williamboman/mason.nvim"
+        use "williamboman/mason-lspconfig.nvim"
         --  Language specific plugins
         use "elkowar/yuck.vim"
-        use "Decodetalkers/csharpls-extended-lsp.nvim" 
+        use "Decodetalkers/csharpls-extended-lsp.nvim"
 
         --  Autosave (might remove this, because we can replicate it with autocmds)
         use 'Pocco81/auto-save.nvim'
@@ -160,7 +159,7 @@ opt.mouse = 'a'
 opt.clipboard = "unnamedplus"
 opt.cursorline = true
 opt.wrap = false
-opt.signcolumn = "number"
+opt.signcolumn = "yes"
 opt.scrolloff = 7
 opt.swapfile = false
 opt.laststatus = 3
@@ -176,6 +175,9 @@ cmd [[ colorscheme tokyonight-moon ]]
 --
 
 local map_options = { noremap = true, silent = true }
+
+--  Reload nvim config with a press of a button
+keymap('n', '<F11>', ":luafile ~/.config/nvim/init.lua<CR>:echo 'Config reloaded!'<CR>", map_options)
 
 --
 --  Insert mode
@@ -234,7 +236,7 @@ g.maplocalleader = " "
 --
 
 if vim.loop.os_uname().sysname == "Windows_NT" then
-    opt.shell = "powershell"
+    opt.shell = "pwsh"
 else
     opt.shell = "/usr/bin/fish"
 end
@@ -245,34 +247,6 @@ end
 --
 --  Plugin configs
 --
-
---  CoC config
---
-
---  I left my CoC config in here in case we need it for some reason
-
---[[cmd [[
-    "   Jump between suggestions
-    inoremap <silent><expr> <tab> 
-        \ coc#pum#visible() ? coc#pum#next(1) : "\<tab>"
-    inoremap <expr> <S-tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-tab>"
-
-    "   cancel or confirm completion
-    inoremap <silent><expr> <return> coc#pum#visible() ? coc#pum#confirm() : "\<return>"
-
-    "   Jump between diagnostics
-    nmap <silent> ő <Plug>(coc-diagnostic-prev)
-    nmap <silent> ú <Plug>(coc-diagnostic-next)
-
-    "   GoTo navigation
-    nmap <silent> gd <Plug>(coc-definition)
-    nmap <silent> gD <Plug>(coc-type-definition)
-    nmap <silent> gi <Plug>(coc-implementation)
-    nmap <silent> gr <Plug>(coc-references)
-
-    "   Show all diagnostics
-    nnoremap <silent><nowait> gn :<C-u>CocList diagnostics<cr>
-]]
 
 --  Star screen (startify)
 --
@@ -294,15 +268,15 @@ cmd [[
 
 require("lualine").setup {
     options = {
-        icons_enabled = false,
+        icons_enabled = true,
         theme = "auto",
         component_separators = {
-            left = '|',
-            right = '|',
+            left = '',
+            right = '',
         },
         section_separators = {
-            left = "",
-            right = "",
+            left = "",
+            right = "",
         },
     },
     extensions = {
@@ -319,7 +293,7 @@ require("nvim-treesitter.configs").setup {
     sync_install = false,
     auto_install = true,
     highlight = {
-        enable = true,
+        enable = false,
         -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
         -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
         -- Using this option may slow down your editor, and you may see some duplicate highlights.
@@ -350,7 +324,7 @@ require("neo-tree").setup({
                 unstaged  = "",
                 staged    = "+",
                 conflict  = "c",
-            }    
+            }
         },
         icon = {
             folder_empty = '',
@@ -366,72 +340,51 @@ require("neo-tree").setup({
     enable_diagnostics = true,
     sort_case_insensitive = true,
     source_selector = {
-        winbar = true,
+        winbar = false,
         statusline = false
     },
     window = {
-        width = 30
-    }
+        width = 30,
+    },
 })
 
+
 keymap('n', '<C-t>', ":Neotree toggle<cr>", map_options)
---keymap('n', '<C-T>', ":Neotree focus<cr>", map_options)
 
 --  Better tabs
 --
 
---[[require('tabby.tabline').set(function(line)
-    local theme = {
-        fill = 'TabLineFill',
-        head = 'TabLine',
-        current_tab = 'TabLineSel',
-        tab = 'TabLine',
-        win = 'TabLine',
-        tail = 'TabLine',
-    }
-
-    return {
-        line.tabs().foreach(function(tab)
-            local hl = tab.is_current() and theme.current_tab or theme.tab
-            return {
-                line.sep('', hl, theme.tab),
-                tab.number(),
-                tab.name(),
-                -- line.sep('', hl, theme.fill ),
-                line.sep('', hl, theme.tab),
-                hl = hl,
-                margin = ' ',
-            }
-        end)
-    }
-end)]]
-
 require("barbar").setup {
     auto_hide = true,
     icons = {
+        button = '',
         separator = {
             left = '',
             right = '',
         },
         separator_at_end = false,
+    },
+    sidebar_filetypes = {
+        NvimTree = true,
+        ["neo-tree"] = {event = 'BufWipeout'},
     }
 }
 
-keymap('n', '<A-0>', '<Cmd>BufferGoto 1<CR>', opts)
-keymap('n', '<A-1>', '<Cmd>BufferGoto 2<CR>', opts)
-keymap('n', '<A-2>', '<Cmd>BufferGoto 3<CR>', opts)
-keymap('n', '<A-3>', '<Cmd>BufferGoto 4<CR>', opts)
-keymap('n', '<A-4>', '<Cmd>BufferGoto 5<CR>', opts)
-keymap('n', '<A-5>', '<Cmd>BufferGoto 6<CR>', opts)
-keymap('n', '<A-6>', '<Cmd>BufferGoto 7<CR>', opts)
-keymap('n', '<A-7>', '<Cmd>BufferGoto 8<CR>', opts)
-keymap('n', '<A-8>', '<Cmd>BufferGoto 9<CR>', opts)
-keymap('n', '<A-9>', '<Cmd>BufferLast<CR>', opts)
-keymap('n', '<A-p>', '<Cmd>BufferPin<CR>', opts)
-keymap('n', '<A-c>', '<Cmd>BufferClose<CR>', opts)
+keymap('n', '<A-0>', '<Cmd>BufferGoto 1<CR>', map_options)
+keymap('n', '<A-1>', '<Cmd>BufferGoto 2<CR>', map_options)
+keymap('n', '<A-2>', '<Cmd>BufferGoto 3<CR>', map_options)
+keymap('n', '<A-3>', '<Cmd>BufferGoto 4<CR>', map_options)
+keymap('n', '<A-4>', '<Cmd>BufferGoto 5<CR>', map_options)
+keymap('n', '<A-5>', '<Cmd>BufferGoto 6<CR>', map_options)
+keymap('n', '<A-6>', '<Cmd>BufferGoto 7<CR>', map_options)
+keymap('n', '<A-7>', '<Cmd>BufferGoto 8<CR>', map_options)
+keymap('n', '<A-8>', '<Cmd>BufferGoto 9<CR>', map_options)
+keymap('n', '<A-9>', '<Cmd>BufferLast<CR>', map_options)
+keymap('n', '<A-p>', '<Cmd>BufferPin<CR>', map_options)
+keymap('n', '<A-c>', '<Cmd>BufferClose<CR>', map_options)
 
-keymap('n', '<A-b>', '<Cmd>Telescope buffers<CR>', opts)
-             
+keymap('n', '<A-b>', '<Cmd>Telescope buffers<CR>', map_options)
+
 --  Autosave plugin
 --
 
@@ -464,7 +417,7 @@ telescope.setup {
     }
 }
 
-telescope.load_extension("ui-select")
+-- telescope.load_extension("ui-select")
 
 --  ToggleTerm
 --
@@ -499,7 +452,7 @@ cmp.setup {
                     cmp.select_next_item()
                 else
                     fallback()
-                end 
+                end
             end),
         ['<S-tab>'] = cmp.mapping(function(fallback)
                 if cmp.visible() then
@@ -531,7 +484,7 @@ cmp.setup.cmdline('/', {
         { name = 'buffer' }
     }
 })
-  
+
 cmp.setup.cmdline(':', {
     mapping = cmp.mapping.preset.cmdline(),
     sources = cmp.config.sources({
@@ -556,7 +509,7 @@ local on_attach = function(client, bufnr)
     api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
     local bufopts = { noremap = true, silent = true, buffer = bufnr }
-    
+
     keymap('n', "<leader>K", vim.lsp.buf.hover, bufopts)
     keymap('n', "<leader>k", vim.lsp.buf.signature_help, bufopts)
     keymap('n', "gD", vim.lsp.buf.declaration, bufopts)
@@ -566,6 +519,41 @@ local on_attach = function(client, bufnr)
     keymap('n', "<leader>r", vim.lsp.buf.rename, bufopts)
     keymap('n', "<leader><return>", vim.lsp.buf.code_action, bufopts)
 end
+
+--  Mason
+--
+
+require("mason").setup()
+
+require("mason-lspconfig").setup {
+    automatic_installation = true,
+    ensure_installed = {
+        "lua_ls",
+        "rust_analyzer",
+        "pyright",
+        "clangd",
+        "csharp_ls",
+    }
+}
+
+require("mason-lspconfig").setup_handlers {
+    function (server_name) -- default handler (optional)
+        require("lspconfig")[server_name].setup {
+            on_attach = on_attach,
+            capabilities = capabilities,
+        }
+    end,
+
+    ["csharp_ls"] = function ()
+        require("lspconfig")["csharp_ls"].setup {
+            on_attach = on_attach,
+            capabilities = capabilities,
+            handlers = {
+                ["textDocument/definition"] = require('csharpls_extended').handler,
+            },
+        }
+    end,
+}
 
 --  DiffView
 --
@@ -578,40 +566,19 @@ require("diffview").setup()
 local neogit = require("neogit")
 neogit.setup {
     integrations = {
-        diffview = true
+        diffview = true,
+        telescope = true,
     }
 }
 
-keymap('n', "<leader>g", neogit.open, bufopts)
+keymap('n', "<leader>g", neogit.open, map_options)
 
+--  GitSigns
 --
---  Language servers
+
+require("gitsigns").setup()
+
+--  Debugger
 --
 
---  Python
-require('lspconfig')["pyright"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-}
-
---  C/C++
-require('lspconfig')["clangd"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-}
-
---  C#
-require('lspconfig')["csharp_ls"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    handlers = {
-        ["textDocument/definition"] = require('csharpls_extended').handler,
-    },
-    --cmd = { "csharpls" },
-}
-
---  Rust
-require('lspconfig')["rust_analyzer"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-}
+-- TODO
