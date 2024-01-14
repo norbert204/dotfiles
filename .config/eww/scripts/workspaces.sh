@@ -2,7 +2,7 @@
 
 spaces() {
     active=$(hyprctl activeworkspace -j | jq '.id')
-    hyprctl workspaces -j | jq -Mc "map({id: .id | tostring, windows: .windows, current: (if .id == $active then true else false end)})|sort_by(.id)"
+    hyprctl workspaces -j | jq -Mc "map({id: .id | tostring, windows: .windows, fullscreen: .hasfullscreen, current: (if .id == $active then true else false end)})|sort_by(.id)"
 }
 
 spaces

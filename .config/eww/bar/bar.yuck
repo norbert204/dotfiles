@@ -6,18 +6,13 @@
   :initial ""
   "./scripts/workspaces.sh")
 
-(defpoll pl-battery
-  :interval "1m"
-  "./scripts/battery.sh")
-
-(defpoll pl-battery-icon
+(defpoll pl-network
   :interval "5s"
-  "./scripts/battery_icon.sh")
+  "./scripts/network.sh")
 
-(defpoll pl-time
+(defpoll pl-wifi-strength
   :interval "5s"
-  "./scripts/time.sh")
-
+  "./scripts/wifi_strength.sh")
 
 ;;;
 ;;;   Widgets
@@ -25,7 +20,7 @@
 
 (defwidget launcher []
   (button :class "btn-launcher"
-          :onclick "~/.local/scripts/wl_launcher.sh"
+          :onclick "./scripts/launch_launcher.sh"
           (label :class "launcher-icon"
                  :text "󱓞")))
 
@@ -38,33 +33,55 @@
        (for ws in ls-workspaces
             (button :onclick "hyprctl dispatch workspace ${ws.id}"
                     :class "workspace-button"
-                    (label :class "${ws.current ? "workspace-current" : ""}"
-                           :text "${ws.id}")))))
+                    (label :class "${ws.current ? "workspace-current" : ""} ${ws.fullscreen ? "workspace-fullscreen" : ""}"
+                           :text "${ws.id - 1}")))))
+
+(defwidget network-status []
+  (button :onclick "footclient ./scripts/network_settings.sh &"
+          (label :class "icon off-icon"
+                 :text "${pl-network == "ethernet" ? "󰌗" :
+                          pl-network == "wifi" ?
+                            pl-wifi-strength < 25 ? "󰤟" : 
+                            pl-wifi-strength < 50 ? "󰤢" :
+                            pl-wifi-strength < 75 ? "󰤥" : 
+                            "󰤨"
+                          : "󰤮" }")))
 
 (defwidget battery-status []
   (box :orientation "horizontal"
        :class "me-1"
        :space-evenly false
-       (label :class "icon me-1 battery-icon ${pl-battery-icon == "󰂄" ? "charging" : pl-battery-icon == "" ? "low" : ""}"
-              :text "${pl-battery-icon}")
-       (label :text "${pl-battery}%")))
+       (label :class "icon me-1 battery-icon ${EWW_BATTERY.BAT1.status == "Charging" ? "charging" : EWW_BATTERY.BAT1.capacity < 10 ? "low" : ""}"
+              :text "${EWW_BATTERY.BAT1.status == "Charging" ? "󰂄" :
+                       EWW_BATTERY.BAT1.capacity < 10 ? "󰁺" :
+                       EWW_BATTERY.BAT1.capacity < 20 ? "󰁻" :
+                       EWW_BATTERY.BAT1.capacity < 30 ? "󰁼" :
+                       EWW_BATTERY.BAT1.capacity < 40 ? "󰁽" :
+                       EWW_BATTERY.BAT1.capacity < 50 ? "󰁾" :
+                       EWW_BATTERY.BAT1.capacity < 60 ? "󰁿" :
+                       EWW_BATTERY.BAT1.capacity < 70 ? "󰂀" :
+                       EWW_BATTERY.BAT1.capacity < 80 ? "󰂁" :
+                       EWW_BATTERY.BAT1.capacity < 90 ? "󰂂" :
+                       "󰁹"}")
+       (label :text "${EWW_BATTERY.BAT1.capacity}%")))
 
 (defwidget time []
   (label :class "me-2"
-         :text "${pl-time}"))
+         :text "${formattime(EWW_TIME, "%b. %d. %H:%M")}"))
 
 (defwidget dropdown-toggle []
-  (button :onclick "./toggle_sidebar.sh"
+  (button :onclick "${EWW_CMD} open --toggle dropdown-closer && ${EWW_CMD} open --toggle dropdown"
           :timeout "1000ms"
-          (label :class "icon"
-                 :text "")))
+          :class "btn-dropdown"
+          (label :class "icon-dropdown"
+                 :text "")))
 
 (defwidget screenshot []
   (button :onclick "~/.local/scripts/wl_screenshot.sh"
-          :onrightclick "~/.local/scripts/wl_screenshot.sh -s"
-          :class "me-1 btn-screenshot"
+          :onrightclick "sleep 1 && ~/.local/scripts/wl_screenshot.sh -s"
+          :class "me-1"
           :tooltip "Take a screenshot"
-          (label :class "icon"
+          (label :class "icon off-icon"
                  :text "󰹑")))
 
 (defwidget volume-icon []
@@ -92,6 +109,7 @@
        :halign "end"
        :space-evenly false
        (screenshot)
+       (network-status)
        (volume-icon)
        (time)
        (battery-status)

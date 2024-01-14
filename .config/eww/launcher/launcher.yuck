@@ -1,0 +1,38 @@
+
+(defwidget launcher-container []
+  (box :class "launcher container"
+       :space-evenly false
+       :orientation "v"
+       :spacing 4
+       (box :class "launcher-search"
+            :space-evenly false
+            :spacing 4
+            (label :text "")
+            (input :class "launcher-search-input"
+                   :onchange "${EWW_CMD} update apps-json=\"$(scripts/launcher.py {})\""
+                   :onaccept "dex ${jq(apps-json, ".[0].path")} && ${EWW_CMD} close launcher"))
+       (scroll :hscroll false
+               :vscroll true
+               :height 300
+               (box :orientation "v"
+                    :space-evenly false
+                    :spacing 4
+                    :class "launcher-item"
+                    (for app in apps-json
+                      (button :onclick "dex ${app.path} && ${EWW_CMD} close launcher"
+                              (box :orientation "h"
+                                   :space-evenly false
+                                   :spacing 4
+                                   (image :path {app.icon}
+                                          :width 24
+                                          :height 24)
+                                   (label :text "${app.name} ${app.from == "default" ? "" : "(${app.from})"}"))))))))
+
+(defwindow launcher
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :anchor "left top")
+  :focusable true
+  :stacking "fg"
+  (launcher-container))

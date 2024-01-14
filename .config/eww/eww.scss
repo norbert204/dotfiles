@@ -1,6 +1,7 @@
 @import "variables";
 @import "bar/bar";
 @import "dropdown/dropdown";
+@import "launcher/launcher";
 
 * {
     all: unset;
@@ -32,7 +33,6 @@
 
 .container {
     background-color: $background;
-    padding: 3px;
     border-radius: 8px;
     border: 2px solid $border;
     box-shadow: 0 2px 3px black;
@@ -48,8 +48,8 @@ tooltip {
 }
 
 button {
-    border-radius: 5px;
-    padding: 2px 10px;
+    border-radius: 0.6rem;
+    padding: 0.2rem 0.5rem;
     transition: background .1s ease-in-out;
 }
 

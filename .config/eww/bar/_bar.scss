@@ -1,5 +1,5 @@
 .bar {
-    margin: 6px 6px 6px 6px;
+    margin: 6px 6px 4px 6px;
 }
 
 /*
@@ -11,7 +11,8 @@
 */
 
 .btn-launcher {
-    padding-right: 20px;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
 }
 
 .launcher-icon {
@@ -27,8 +28,13 @@
     color: $green;
 }
 
+.workspace-fullscreen {
+    // color: $blue;
+    text-decoration: underline;
+}
+
 .workspace-button {
-    padding: 0 10px;
+    padding: 0 0.75rem;
 }
 
 /*
@@ -47,14 +53,30 @@
 */ 
 
 .btn-screenshot {
-    padding-right: 20px;
+    padding-right: 1.5rem;
 }
 
+/*
+    Dropdown
+*/
+
+.btn-dropdown {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.icon-dropdown {
+    font-size: 1.75rem;
+}
 
 /*
     Misc
 */
 
 .icon {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+}
+
+.off-icon {
+    padding-right: 0.725rem;
 }

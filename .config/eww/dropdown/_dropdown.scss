@@ -1,7 +1,8 @@
+$profile-size: 64px;
+
 /*
     Common
 */
-
 
 tooltip {
     background-color: black;
@@ -10,6 +11,18 @@ tooltip {
 
 .dropdown {
     margin: 6px;
+    padding: 10px;
+}
+
+/*
+    Profile
+*/
+
+.image-profile {
+    min-height: $profile-size;
+    min-width: $profile-size;
+    border-radius: 100%;
+    background-size: $profile-size;
 }
 
 /*
@@ -17,7 +30,7 @@ tooltip {
 */ 
 
 .btn-powermenu {
-    padding: 20px;
+    padding: 20px 10px;
 }
 
 .btn-powermenu-text {

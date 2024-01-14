@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-COMMAND=$(eww windows)
+eww open --toggle dropdown
 
-if [[ ${COMMAND} == *"*dropdown"* ]] ; then
-    eww close dropdown
-else
-    eww open dropdown
-fi
+# COMMAND=$(eww windows)
+# 
+# if [[ ${COMMAND} == *"*dropdown"* ]] ; then
+#     eww close dropdown
+# else
+#     eww open dropdown
+# fi

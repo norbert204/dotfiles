@@ -1,6 +1,20 @@
 (include "./bar/bar.yuck")
 (include "./dropdown/dropdown.yuck")
+(include "./launcher/launcher.yuck")
 
 (defpoll pl-volume-icon
   :interval "1s"
   "./scripts/volume_icon.sh")
+
+(defvar apps-json "")
+
+;;;
+;;;   Global
+;;;
+
+; TODO: This should be a simple variable
+(deflisten full-name
+  "getent passwd $USER | cut -d ':' -f 5 | cut -d ',' -f 1")
+
+(deflisten home
+  "echo $HOME")
