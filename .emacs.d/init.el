@@ -27,7 +27,7 @@
 ;;; Very basic packages
 
 ;; Diminish modes from showing up in the modeline
-(use-package diminish) 
+(use-package diminish)
 
 ;;;
 ;;; Basic settings
@@ -42,6 +42,10 @@
 ;; Use 4 space tabs by default
 (setq-default tab-width 4)
 
+;; Indentation for C style languages
+(setq-default c-default-style "bsd")
+(setq-default c-basic-offset 4)
+
 ;; Please use spaces instead of tab character
 (setq indent-line-function 'insert-tab)
 
@@ -52,18 +56,25 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Disable backup files
+(setq backup-directory-alist '((".*" . "~/.Trash")))
 (setq make-backup-files nil)
 
 ;; Disable line wrapping
 (setq-default truncate-lines t)
 
-;; Somewhat smooth scrolling when using keyboard
+;; Somewhat smooth scrolling
 ;; It's beyond me why achieving some sort of smooth scrolling in Emacs is so difficult and hacky.
-(setq redisplay-dont-pause t
-  scroll-margin 7
-  scroll-step 1
-  scroll-conservatively 10
-  scroll-preserve-screen-position 1)
+
+;;(setq redisplay-dont-pause t
+;;  scroll-margin 7
+;;  scroll-step 1
+;;  scroll-conservatively 10
+;;  scroll-preserve-screen-position 1)
+
+(setq scroll-conservatively 100000)
+(setq scroll-margin 7)
+(setq redisplay-dont-pause t)
+(setq fast-but-imprecise-scrolling nil)
 
 ;;;
 ;;; UI
@@ -76,10 +87,14 @@
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
-;(menu-bar-mode -1)
+(menu-bar-mode -1)
 
 ;; Set font
-(set-face-attribute 'default nil :font "mononoki Nerd Font Mono" :height 140)
+(set-face-attribute 'default nil :font "Roboto Mono-14")
+(set-face-attribute 'variable-pitch nil :font "Roboto-14")
+(set-face-attribute 'fixed-pitch nil :font "Roboto Mono-14")
+    
+(add-to-list 'default-frame-alist '(font . "Roboto Mono-14"))
 
 ;; Highlight current line
 (global-hl-line-mode 1)
@@ -96,15 +111,15 @@
 ; Disable line numbers for some modes
 (dolist (mode '(term-mode-hook
                 eshell-mode-hook
-                org-mode-hook))
+                vterm-mode-hook))
   (add-hook mode (lambda() (display-line-numbers-mode 0))))
 
 ;; Theme
 (use-package doom-themes
   :config
   (setq doom-themes-enable-bold t)
-  (setq doom-themes-enable-italic t))
-  (load-theme 'doom-one t)
+  (setq doom-themes-enable-italic t)
+  (load-theme 'doom-one t))
 
 ;; All the icons
 (use-package all-the-icons
@@ -123,7 +138,7 @@
 ;; Ivy trio (for better command completition)
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
-         ;("C-x b" . counsel-ibuffer)
+         ("C-x b" . counsel-ibuffer)
          ("C-x f" . counsel-find-file))
   :custom ((ivy-initial-inputs-alist nil)))  ; Don't start ivy searches with ^ (mostly significant for M-x)
 
@@ -193,6 +208,12 @@
   :hook (org-mode . org-bullets-mode)
   :custom (org-bullets-bullet-list '("▸")))
 
+(require 'org-tempo)
+
+;; Disable src block indentation
+;(electric-indent-mode -1)
+;(setq org-edit-src-content-indentation 0)
+
 ;;;
 ;;; Plugins for development
 ;;;
@@ -205,7 +226,18 @@
   :bind-keymap ("C-c p" . projectile-command-map))
 
 ;; Magit
-(use-package magit)
+(use-package magit
+  :bind ("C-c g" . magit-status)
+  :config
+  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
+    
+;; Git signs
+(use-package git-gutter-fringe
+  :hook (prog-mode . git-gutter-mode)
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
 ;; LSP mode
 (use-package lsp-mode
@@ -242,30 +274,41 @@
   :hook (python-mode . (lambda() (require 'lsp-pyright)
                           (lsp-deferred))))
 
+; Eww
+(use-package yuck-mode)
+
 ;;;
 ;;; Evil (Because I like VIM)
 ;;;
 
 ;; Keychords first
-;(use-package key-chord
-;  :config (key-chord-mode 1))
-;
-;;; Evil itself
-;(use-package evil
-;  :init (setq evil-want-keybinding nil)
-;  :custom ((evil-shift-width tab-width)
-;           (evil-shift-round t)
-;           (evil-split-window-below t)
-;           (evil-split-window-right t))
-;  :config
-;  (evil-mode)
-;  (evil-global-set-key 'normal (kbd "C-r") 'undo-redo)
-;  (define-key evil-normal-state-map (kbd "é") "$")
-;  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
-;
-;;; Evil collection for other plugins
-;(use-package evil-collection
-;  :after evil
-;  :custom (evil-collection-mode list (magit))
-;  :config
-;  (evil-collection-init))
+(use-package key-chord
+  :config (key-chord-mode 1))
+
+;; Evil itself
+(use-package evil
+  :init (setq evil-want-keybinding nil)
+  :custom ((evil-shift-width tab-width)
+           (evil-shift-round t)
+           (evil-split-window-below t)
+           (evil-split-window-right t))
+  :config
+  (evil-mode)
+  (evil-global-set-key 'normal (kbd "C-r") 'undo-redo)
+  (define-key evil-normal-state-map (kbd "é") "$")
+  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
+
+;; Evil collection for other plugins
+(use-package evil-collection
+  :after evil
+  :custom (evil-collection-mode list (magit))
+  :config
+  (evil-collection-init))
+
+;; Vterm
+
+(use-package vterm
+  :bind ("C-c t" . vterm)
+  :hook (vterm-mode-hook . (lambda ()
+            (set (make-local-variable 'buffer-face-mode-face) 'fixed-pitch)
+                 (buffer-face-mode t))))
