@@ -31,6 +31,7 @@ vim.opt.rtp:prepend(lazypath)
 
 opt.encoding = "utf-8"
 opt.number = true
+opt.relativenumber = true
 
 --  New splits in the correct place
 --
@@ -99,6 +100,15 @@ keymap('n', 'j', "gj", map_options)
 keymap('n', 'k', "gk", map_options)
 
 --
+--  Normal+Visual mode
+
+--  Center after jumps
+keymap({'n', 'v'}, "<C-f>", "<C-f>zz", map_options)
+keymap({'n', 'v'}, "<C-b>", "<C-b>zz", map_options)
+keymap({'n', 'v'}, "<C-d>", "<C-d>zz", map_options)
+keymap({'n', 'v'}, "<C-u>", "<C-u>zz", map_options)
+
+--
 --  Visual mode
 
 --  Search for the highlighted text
@@ -116,7 +126,7 @@ keymap('t', "jk", "<C-\\><C-n>", map_options)
 keymap('', 'é', '$', map_options)
 
 --  Space as leader
-keymap('', "<Space>", "<Nop>", map_options)
+-- keymap('', "<Space>", "<Nop>", map_options)
 g.mapleader = " "
 g.maplocalleader = " "
 
@@ -166,6 +176,7 @@ require("lazy").setup({
                     keymap('n', 'h', nvt_api.tree.change_root_to_parent, opts('Up'))
                     keymap('n', "l", nvt_api.tree.change_root_to_node, opts('CD'))
                     keymap('n', "?", nvt_api.tree.toggle_help, opts("Help"))
+                    keymap('n', "<space>", nvt_api.node.open.edit, opts("Help"))
                 end,
             }
 
@@ -203,7 +214,9 @@ require("lazy").setup({
                     mappings = {
                         i = {
                             ["<C-j>"] = "move_selection_next",
-                            ["<C-k>"] = "move_selection_previous"
+                            ["<C-k>"] = "move_selection_previous",
+                            -- ["<tab>"] = "move_selection_next",
+                            -- ["<S-tab>"] = "move_selection_previous",
                         }
                     }
                 },
@@ -216,7 +229,9 @@ require("lazy").setup({
 
             telescope.load_extension("ui-select")
 
-            keymap('n', "<leader>f", telescope_builtin.current_buffer_fuzzy_find, map_options)
+            keymap('n', "<leader>ft", telescope_builtin.current_buffer_fuzzy_find, map_options)
+            keymap('n', "<leader>ff", telescope_builtin.find_files, map_options)
+            keymap('n', "<leader>fg", telescope_builtin.git_files, map_options)
 
             -- Telescope git
             keymap('n', "<leader>gb", telescope_builtin.git_branches, map_options)
@@ -255,25 +270,27 @@ require("lazy").setup({
         end
     },
     {
-        "neovim/nvim-lspconfig",
-        dependencies = {
-            "hrsh7th/nvim-cmp",
-            "hrsh7th/cmp-nvim-lsp",
-            "hrsh7th/cmp-buffer",
-            "hrsh7th/cmp-path",
-            "hrsh7th/cmp-cmdline",
-            "L3MON4D3/LuaSnip"
-        }
-    },
-    {
         "lewis6991/gitsigns.nvim",
-        config = true
+        config = function()
+            local gitsigns = require("gitsigns")
+
+            gitsigns.setup()
+
+            keymap('n', "<leader>gp", gitsigns.preview_hunk, map_options)
+        end
     },
     {
         "neovim/nvim-lspconfig",
         dependencies = {
             "nvim-telescope/telescope.nvim",
             "lvimuser/lsp-inlayhints.nvim",
+
+            -- "hrsh7th/nvim-cmp",
+            -- "hrsh7th/cmp-nvim-lsp",
+            -- "hrsh7th/cmp-buffer",
+            -- "hrsh7th/cmp-path",
+            -- "hrsh7th/cmp-cmdline",
+            -- "L3MON4D3/LuaSnip",
         },
         config = function()
             local inlay_hints = require("lsp-inlayhints")
@@ -323,9 +340,15 @@ require("lazy").setup({
         end
     },
     {
+        "L3MON4D3/LuaSnip",
+        version = "v2.*",
+        build = "make install_jsregexp"
+    },
+    {
         "hrsh7th/nvim-cmp",
         dependencies = {
             "hrsh7th/cmp-nvim-lsp",
+            "hrsh7th/cmp-nvim-lsp-signature-help",
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-path",
             "hrsh7th/cmp-cmdline",
@@ -333,6 +356,7 @@ require("lazy").setup({
             "saadparwaiz1/cmp_luasnip",
 
             "windwp/nvim-autopairs",
+            "saecki/crates.nvim",
         },
         config = function()
             local cmp = require("cmp")
@@ -368,9 +392,12 @@ require("lazy").setup({
                 }),
                 sources = cmp.config.sources({
                     { name = "nvim_lsp" },
+                    { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
                     { name = "buffer" },
                     { name = "path" },
+                    -- Extra from plugins
+                    { name = "crates" },
                 }),
             }
 
@@ -443,6 +470,14 @@ require("lazy").setup({
         end
     },
     {
+        "saecki/crates.nvim",
+        tag = "stable",
+        dependencies = {
+            "nvim-lua/plenary.nvim"
+        },
+        config = true,
+    },
+    {
         "aserowy/tmux.nvim",
         config = true,
     },
@@ -481,6 +516,28 @@ require("lazy").setup({
             keymap('n', "<leader>bc", "<Cmd>BufferClose<CR>", map_options)
 
             keymap('n', "<leader>bb", "<Cmd>Telescope buffers<CR>", map_options)
+        end
+    },
+    {
+        "sindrets/diffview.nvim",
+        config = true
+    },
+    {
+        "NeogitOrg/neogit",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-telescope/telescope.nvim",
+            "sindrets/diffview.nvim",
+        },
+        config = function()
+            local neogit = require("neogit")
+
+            neogit.setup {
+                graph_style = "unicode",
+                kind = "replace",
+            }
+
+            keymap('n', "<leader>gg", neogit.open, map_options)
         end
     }
 },
