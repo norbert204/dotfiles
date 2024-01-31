@@ -479,7 +479,13 @@ require("lazy").setup({
     },
     {
         "aserowy/tmux.nvim",
-        config = true,
+        config = function()
+            require("tmux").setup {
+                copy_sync = {
+                    enable = false
+                }
+            }
+        end,
     },
     {
         "romgrk/barbar.nvim",
