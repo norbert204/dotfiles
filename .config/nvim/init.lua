@@ -58,10 +58,11 @@ opt.signcolumn = "yes"
 opt.scrolloff = 7
 opt.swapfile = false
 opt.laststatus = 3
-
 if fn.has("termguicolors") then
     opt.termguicolors = true
 end
+
+cmd([[let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro']])
 
 --
 --  Quality of life improving keybindings
@@ -132,6 +133,11 @@ g.maplocalleader = " "
 
 local theme = "tokyonight-moon"
 
+-- NetRW
+--
+
+keymap('n', "<leader>n", cmd.Ex, map_options)
+
 --
 --  Plugins
 --
@@ -152,45 +158,6 @@ require("lazy").setup({
     },
     {
         "nvim-tree/nvim-web-devicons"
-    },
-    {
-        "nvim-tree/nvim-tree.lua",
-        config = function()
-            vim.g.loaded_netrw = 1
-            vim.g.loaded_netrwPlugin = 1
-
-            require("nvim-tree").setup {
-                sort_by = "case_sensitive",
-                view = {
-                    width = 30,
-                },
-                on_attach = function(bufnr)
-                    local nvt_api = require "nvim-tree.api"
-
-                    local function opts(desc)
-                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-                    end
-
-                    nvt_api.config.mappings.default_on_attach(bufnr)
-
-                    keymap('n', 'h', nvt_api.tree.change_root_to_parent, opts('Up'))
-                    keymap('n', "l", nvt_api.tree.change_root_to_node, opts('CD'))
-                    keymap('n', "?", nvt_api.tree.toggle_help, opts("Help"))
-                    keymap('n', "<space>", nvt_api.node.open.edit, opts("Help"))
-                end,
-            }
-
-            api.nvim_create_autocmd("BufEnter", {
-                nested = true,
-                callback = function()
-                    if #api.nvim_list_wins() == 1 and require("nvim-tree.utils").is_nvim_tree_buf() then
-                        cmd "quit"
-                    end
-                end
-            })
-
-            keymap('n', "<leader>t", ":NvimTreeToggle<cr>", map_options)
-        end
     },
     {
         "nvim-treesitter/nvim-treesitter",
@@ -545,7 +512,7 @@ require("lazy").setup({
 
             keymap('n', "<leader>gg", neogit.open, map_options)
         end
-    }
+    },
 },
 {
     install = {
