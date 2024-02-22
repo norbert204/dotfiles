@@ -154,7 +154,8 @@ require("lazy").setup({
         end
     },
     {
-        "folke/tokyonight.nvim",
+        "ellisonleao/gruvbox.nvim",
+        config = true
     },
     {
         "nvim-tree/nvim-web-devicons"
@@ -520,4 +521,8 @@ require("lazy").setup({
     }
 })
 
-cmd.colorscheme "tokyonight-moon"
+vim.o.background = "dark" -- or "light" for light mode
+cmd.colorscheme "gruvbox"
+
+api.nvim_set_hl(0, "Normal", {bg = "none" })
+api.nvim_set_hl(0, "NormalFloat", {bg = "none" })
