@@ -1,6 +1,5 @@
 #+TITLE: Emacs configuration
-
-Made by Norbert Horvath (norbert204)
+#+AUTHOR: Norbert Horvath (norbert204)
 
 * Bootstrapping
 ** Package handling
@@ -57,19 +56,29 @@ Made by Norbert Horvath (norbert204)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; disable backup files
-(setq backup-directory-alist '((".*" . "~/.trash")))
+(setq backup-directory-alist '((".*" . "/dev/null")))
 (setq make-backup-files nil)
 
 ;; disable line wrapping
 (setq-default truncate-lines t)
 
+;; Please autosave
+(auto-save-visited-mode 1)
+
 ;; somewhat smooth scrolling
 ;; it's beyond me why achieving some sort of smooth scrolling in emacs is so difficult and hacky.
-
 (setq scroll-conservatively 100000)
 (setq scroll-margin 7)
 (setq redisplay-dont-pause t)
 (setq fast-but-imprecise-scrolling nil)
+
+;; No popup windows and dialogs please
+(setq use-file-dialog nil)
+(setq use-dialog-box nil)
+(setq pop-up-windows nil)
+
+;; Give me the other half of the parenthesis automatically pls
+(electric-pair-mode 1)
 
 #+end_src
 * Appearance
@@ -95,9 +104,8 @@ Made by Norbert Horvath (norbert204)
 (global-hl-line-mode 1)
 
 ;; Line numbers
-(column-number-mode)
 (setq display-line-numbers-type 'relative) 
-(global-display-line-numbers-mode t)
+(global-display-line-numbers-mode 1)
 
 ; Disable line numbers for some modes
 (dolist (mode '(term-mode-hook
@@ -132,12 +140,13 @@ Made by Norbert Horvath (norbert204)
   :bind (:map evil-normal-state-map
               ("g t" . centaur-tabs-forward)
               ("g T" . centaur-tabs-backward))
+  :custom
+  (centaur-tabs-height 32)
+  (centaur-tabs-set-icons t)
+  (centaur-tabs-style "bar")
+  (centaur-tabs-set-bar 'over)
+  ;; (centaur-tabs-set-modified-marker t)
   :config
-  (setq centaur-tabs-height 32)
-  (setq centaur-tabs-style "bar")
-  (setq centaur-tabs-set-icons t)
-  (setq centaur-tabs-set-bar 'over)
-  (setq centaur-tabs-set-modified-marker t)
   (centaur-tabs-group-by-projectile-project)
   (centaur-tabs-mode t))
 
@@ -191,9 +200,9 @@ Made by Norbert Horvath (norbert204)
 ** Which key
 #+begin_src elisp
 
-  (use-package which-key
-    :init (which-key-mode t)
-    :custom ((which-key-idle-delay 0.5)))
+(use-package which-key
+  :init (which-key-mode t)
+  :custom ((which-key-idle-delay 0.5)))
 
 #+end_src
 ** Evil mode
@@ -206,24 +215,35 @@ Made by Norbert Horvath (norbert204)
 
 ;; Evil itself
 (use-package evil
-  :init (setq evil-want-keybinding nil)
+  :init
+  (setq evil-want-keybinding nil)
+  (setq evil-want-integration t)
   :custom ((evil-shift-width tab-width)
            (evil-shift-round t)
            (evil-split-window-below t)
-           (evil-split-window-right t))
+           (evil-split-window-right t)
+           (evil-want-C-u-scroll t)
+           (evil-undo-system 'undo-redo))
   :config
   (evil-mode)
-  (evil-global-set-key 'normal (kbd "C-r") 'undo-redo)
-  (evil-global-set-key 'normal (kbd "C-u") 'evil-scroll-up)
   (define-key evil-normal-state-map (kbd "é") "$")
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state))
 
 ;; Evil collection for other plugins
 (use-package evil-collection
   :after evil
-  :custom (evil-collection-mode list (magit))
   :config
+  (dolist (mode '(magit help))
+          (add-to-list 'evil-collection-mode-list 'mode))
   (evil-collection-init))
+
+;; This wasn't in the collection
+(use-package evil-org
+  :after (org evil)
+  :hook (org-mode . evil-org-mode)
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
 
 #+end_src
 * Org mode
@@ -236,7 +256,11 @@ Made by Norbert Horvath (norbert204)
                       (visual-line-mode 1)))
   :custom ((org-directory "~/pCloudDrive/OrgNotes/")
            (org-agenda-files (list org-directory))
-           (setq org-auto-align-tags t)))
+           (setq org-auto-align-tags t))
+  :config
+  ;; Disable electric pair mode for <> when in org mode for org-tempo to work
+  (add-hook 'org-mode-hook (lambda () (setq-local electric-pair-inhibit-predicate
+                                                  `(lambda (c) (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c)))))))
 
 ;; Have variable size headings
 (dolist (face '((org-level-1 . 1.5)
@@ -250,16 +274,12 @@ Made by Norbert Horvath (norbert204)
   (set-face-attribute (car face) nil :height (cdr face)))
 
 (use-package org-bullets
-  :after (org)
+  :after org
   :hook (org-mode . org-bullets-mode))
-
-;(use-package org-modern
-;  :hook (org-mode . org-modern-mode))
 
 (require 'org-tempo)
 
 ;; Disable src block indentation
-;(electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
 
 #+end_src
@@ -307,6 +327,7 @@ Made by Norbert Horvath (norbert204)
   :custom ((company-idle-delay 0.0)
            (company-minimum-prefix-length 1)))
 
+;; TODO: replace later with built in tree-sitter
 (use-package tree-sitter
   :config
   (global-tree-sitter-mode)
@@ -374,7 +395,7 @@ Subject to change! As I use emacs I'll find more and more things that I could re
   ;; Buffer commands
   (leader-key
     "b" '(:ignore t :wk "Buffer commands")
-    "b b" '(counsel-ibuffer :wk "Buffer switcher")
+    "b b" '(counsel-switch-buffer :wk "Buffer switcher")
     "b g" '(centaur-tabs-counsel-switch-group :wk "Switch centaur tab buffer group")
     "b c" '(kill-this-buffer :wk "Kill current buffer")
     "b k" '(kill-buffer :wk "Kill a buffer")
@@ -384,8 +405,8 @@ Subject to change! As I use emacs I'll find more and more things that I could re
   ;; Search commands
   (leader-key
     "f" '(:ignore t :wk "Search commands")
-    "f t" '(counsel-find-file :wk "Find file")
-    "f f" '(swiper :wk "Search in current buffer"))
+    "f f" '(counsel-find-file :wk "Find file")
+    "f t" '(swiper :wk "Search in current buffer"))
 
   ;; Git commands
   (leader-key
@@ -399,6 +420,15 @@ Subject to change! As I use emacs I'll find more and more things that I could re
   ;; Misc
   (leader-key
     "SPC" '(counsel-M-x :wk "M-X"))
+  ;; Org
+  (leader-key
+    "o" '(:ignore t :wk "Org commands")
+    "o t" '(org-todo-list :wk "TODO list"))
+
+  ;; Dired
+  (general-define-key
+    :keymaps 'dired-mode-map
+    "n" '(dired-create-empty-file :wk "Create emtpy file"))
 )
 
 #+end_src
