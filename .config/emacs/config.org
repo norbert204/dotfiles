@@ -307,25 +307,41 @@
 #+begin_src elisp
 
 ;; LSP mode
-(use-package lsp-mode
-  :custom (lsp-keymap-prefix "C-l")
-  :hook ((c-mode . lsp-deferred)
-         (csharp-mode . lsp-deferred)
-         (rust-mode . lsp-deferred))
-  :commands (lsp lsp-deferred))
+;; (use-package lsp-mode
+;;   :custom (lsp-keymap-prefix "C-l")
+;;   :hook ((c-mode . lsp-deferred)
+;;          (csharp-mode . lsp-deferred)
+;;          (rust-mode . lsp-deferred))
+;;   :commands (lsp lsp-deferred))
 
-(use-package lsp-ui
-  :commands (lsp-ui-mode))
+;; (use-package lsp-ui
+;;   :commands (lsp-ui-mode))
 
-(use-package lsp-ivy
-  :commands lsp-ivy-workspace-symbol)
+;; (use-package lsp-ivy
+;;   :commands lsp-ivy-workspace-symbol)
+
+;; Eglot
+(use-package eglot
+  :hook
+  (python-mode . eglot-ensure)
+  (rust-mode . eglot-ensure)
+  (c-mode . eglot-ensure))
+
+(use-package eldoc-box
+  :hook (eglot-managed-mode . eldoc-box-hover-at-point-mode))
 
 (use-package company
+  :hook (after-init . company-tng-mode)
   :bind (:map company-active-map
-         ("<tab>" . company-complete-common-or-cycle)
-         ("<backtab>" . company-select-previous))
+              ("<tab>" . company-complete-common-or-cycle)
+              ("<backtab>" . company-select-previous))
   :custom ((company-idle-delay 0.0)
-           (company-minimum-prefix-length 1)))
+           (company-minimum-prefix-length 1)
+           (company-selection-wrap-around t)
+           (global-company-mode t)))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 ;; TODO: replace later with built in tree-sitter
 (use-package tree-sitter
@@ -350,19 +366,11 @@
 (setq-default c-default-style "bsd")
 (setq-default c-basic-offset 4)
 
-; Python
-(use-package lsp-pyright
-  :hook (python-mode . (lambda() (require 'lsp-pyright)
-                          (lsp-deferred))))
-
 ; Eww
 (use-package yuck-mode)
 
 ; Rust
-(use-package rust-mode
-  :config
-  ;(rust-mode)
-)
+(use-package rust-mode)
 
 #+end_src
 ** Extra
@@ -417,9 +425,18 @@ Subject to change! As I use emacs I'll find more and more things that I could re
   (leader-key
     "p" '(projectile-command-map :wk "Projectile commands"))
 
+  ;; Eglot
+  (leader-key
+    :keymap 'eglot-mode-map
+    "l" '(:ignore t :wk "LSP (Eglot) commands")
+    "l r" '(eglot-rename :wk "Rename")
+    "<return>" '(eglot-code-actions :wk "Code actions"))
+
   ;; Misc
   (leader-key
-    "SPC" '(counsel-M-x :wk "M-X"))
+    "SPC" '(counsel-M-x :wk "M-X")
+    "r" '(eval-expression :wk "Eval expression"))
+
   ;; Org
   (leader-key
     "o" '(:ignore t :wk "Org commands")
