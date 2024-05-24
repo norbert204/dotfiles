@@ -184,7 +184,7 @@ require("lazy").setup({
     },
     {
         "nvim-telescope/telescope.nvim",
-        tag = '0.1.4',
+        tag = '0.1.6',
         dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-telescope/telescope-ui-select.nvim"
@@ -344,8 +344,8 @@ require("lazy").setup({
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-path",
             "hrsh7th/cmp-cmdline",
-            "L3MON4D3/LuaSnip",
             "saadparwaiz1/cmp_luasnip",
+            "L3MON4D3/LuaSnip",
 
             "windwp/nvim-autopairs",
             "saecki/crates.nvim",
@@ -422,9 +422,10 @@ require("lazy").setup({
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "hrsh7th/cmp-nvim-lsp",
+
             -- Language specific plugins
             "elkowar/yuck.vim",
-            "Decodetalkers/csharpls-extended-lsp.nvim",
+            "jlcrochet/vim-razor",
         },
         config = function()
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
@@ -438,7 +439,7 @@ require("lazy").setup({
                     "rust_analyzer",
                     "pyright",
                     "clangd",
-                    "csharp_ls",
+                    "omnisharp",
                 }
             }
 
@@ -450,12 +451,10 @@ require("lazy").setup({
                 end,
 
                 -- Custom handlers
-                ["csharp_ls"] = function()
-                    require("lspconfig")["csharp_ls"].setup {
+                ["omnisharp"] = function()
+                    require("lspconfig")["omnisharp"].setup{
                         capabilities = capabilities,
-                        handlers = {
-                            ["textDocument/definition"] = require('csharpls_extended').handler,
-                        },
+                        filetypes = { "cs", "cshtml", "razor" },
                     }
                 end,
             }
@@ -470,14 +469,21 @@ require("lazy").setup({
         config = true,
     },
     {
-        "aserowy/tmux.nvim",
-        config = function()
-            require("tmux").setup {
-                copy_sync = {
-                    enable = false
-                }
-            }
-        end,
+        "christoomey/vim-tmux-navigator",
+        cmd = {
+            "TmuxNavigateLeft",
+            "TmuxNavigateDown",
+            "TmuxNavigateUp",
+            "TmuxNavigateRight",
+            "TmuxNavigatePrevious",
+        },
+        keys = {
+            { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+            { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+            { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+            { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+            { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+        },
     },
     {
         "romgrk/barbar.nvim",
@@ -548,6 +554,4 @@ require("lazy").setup({
 vim.o.background = "dark" -- or "light" for light mode
 cmd.colorscheme "gruvbox"
 
-api.nvim_set_hl(0, "Normal", {bg = "none" })
-api.nvim_set_hl(0, "NormalFloat", {bg = "none" })
 register_keymaps()
