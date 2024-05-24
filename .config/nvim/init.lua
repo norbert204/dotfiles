@@ -5,13 +5,13 @@
 local fn = vim.fn
 local g = vim.g
 local opt = vim.opt
-local keymap = vim.keymap.set
 local cmd = vim.cmd
 local api = vim.api
 local lsp = vim.lsp
 
 -- Lazy
 --
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
@@ -58,85 +58,102 @@ opt.signcolumn = "yes"
 opt.scrolloff = 7
 opt.swapfile = false
 opt.laststatus = 3
+
 if fn.has("termguicolors") then
     opt.termguicolors = true
 end
 
 cmd([[let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro']])
 
+local map_options = { noremap = true, silent = true }
+
 --
 --  Quality of life improving keybindings
 --
 
-local map_options = { noremap = true, silent = true }
+local keymaps = {
+    --  Reload nvim config with a press of a button (Broken with Lazy)
+    -- { 'n', '<F11>', ":luafile ~/.config/nvim/init.lua<CR>:echo 'Config reloaded!'<CR>" },
 
---  Reload nvim config with a press of a button
-keymap('n', '<F11>', ":luafile ~/.config/nvim/init.lua<CR>:echo 'Config reloaded!'<CR>", map_options)
+    --  Use JK keycombo instead of ESC to exit insert mode
+    { 'i', 'jk', "<esc>" },
 
---
---  Insert mode
+    --  An easier way to switch between splits
+    --  (Done by vim-tmux plugin)
+    -- { 'n', '<C-h>', "<C-w>h" },
+    -- { 'n', '<C-j>', "<C-w>j" },
+    -- { 'n', '<C-k>', "<C-w>k" },
+    -- { 'n', '<C-l>', "<C-w>l" },
 
---  Use JK keycombo instead of ESC to exit insert mode
-keymap('i', 'jk', "<esc>", map_options)
+    --  Jump to the start or to the end of the line
+    { 'i', '<C-A>', "<esc>A" },
+    { 'i', '<C-E>', "<esc>I" },
 
---  Jump to the start or to the end of the line
-keymap('i', '<C-A>', "<esc>A", map_options)
-keymap('i', '<C-E>', "<esc>I", map_options)
+    --  When wrap is enabled, navigating the wraped lines is a pain by default
+    { 'n', 'j', "gj" },
+    { 'n', 'k', "gk" },
 
---
---  Normal mode
+    --  Center after jumps
+    { {'n', 'v'}, "<C-f>", "<C-f>zz" },
+    { {'n', 'v'}, "<C-b>", "<C-b>zz" },
+    { {'n', 'v'}, "<C-d>", "<C-d>zz" },
+    { {'n', 'v'}, "<C-u>", "<C-u>zz" },
 
---  An easier way to switch between splits
-keymap('n', '<C-h>', "<C-w>h", map_options)
-keymap('n', '<C-j>', "<C-w>j", map_options)
-keymap('n', '<C-k>', "<C-w>k", map_options)
-keymap('n', '<C-l>', "<C-w>l", map_options)
+    --  Search for the highlighted text
+    { 'v', '/', "y/<C-r><C-0><return><esc>" },
 
-if vim.loop.os_uname().sysname == "Linux" then
-    keymap('n', "<F12>", ":e ~/.config/nvim/init.lua<cr>", map_options)
+    --  Escape from insert mode in terminal with the same keychord as from regular insert mode
+    { 't', "jk", "<C-\\><C-n>" },
+
+    --  Hungarian keyboard shenanigans
+    { '', 'é', '$' },
+
+    -- Thanks Primeagen
+    { 'v', "J", ":m '>+1<CR>gv=gv" },
+    { 'v', "K", ":m '<-2<CR>gv=gv" },
+
+    -- 
+    { 'n', "<leader>n", cmd.Ex },
+
+    -- Buffers
+    { 'n', "<leader>bp", "<cmd>bprevious<cr>" },
+    { 'n', "<leader>bn", "<cmd>bnext<cr>" },
+    { 'n', "<C-S-P>", "<cmd>bprevious<cr>" },
+    { 'n', "<C-S-N>", "<cmd>bnext<cr>" },
+
+    -- Split resizing
+    { 'n', "<M-h>", "<C-w>5<" },
+    { 'n', "<M-l>", "<C-w>5>" },
+    { 'n', "<M-k>", "<C-w>+" },
+    { 'n', "<M-j>", "<C-w>-" },
+}
+
+local function register_keymaps()
+    -- Register the keymaps all at once (might be a bit overkill)
+    for _, v in ipairs(keymaps) do
+        if #v == 4 then
+            vim.keymap.set(v[1], v[2], v[3], v[4])
+        else
+            vim.keymap.set(v[1], v[2], v[3], map_options)
+        end
+    end
 end
 
---  When wrap is enabled, navigating the wraped lines is a pain by default
-keymap('n', 'j', "gj", map_options)
-keymap('n', 'k', "gk", map_options)
+local function append_keymaps(maps)
+    for _,v in ipairs(maps) do
+        table.insert(keymaps, v)
+    end
+end
 
---
---  Normal+Visual mode
-
---  Center after jumps
-keymap({'n', 'v'}, "<C-f>", "<C-f>zz", map_options)
-keymap({'n', 'v'}, "<C-b>", "<C-b>zz", map_options)
-keymap({'n', 'v'}, "<C-d>", "<C-d>zz", map_options)
-keymap({'n', 'v'}, "<C-u>", "<C-u>zz", map_options)
-
---
---  Visual mode
-
---  Search for the highlighted text
-keymap('v', '/', "y/<C-r><C-0><return><esc>", map_options)
-
---
---  Terminal mode
-
---  Escape from insert mode in terminal with the same keychord as from regular insert mode
-keymap('t', "jk", "<C-\\><C-n>", map_options)
-
---
---  General
-
-keymap('', 'é', '$', map_options)
+if vim.loop.os_uname().sysname == "Linux" or vim.loop.os_uname().sysname == "Darwin" then
+    table.insert(keymaps, { 'n', "<F12>", ":e ~/.config/nvim/init.lua<cr>", map_options })
+end
 
 --  Space as leader
--- keymap('', "<Space>", "<Nop>", map_options)
 g.mapleader = " "
 g.maplocalleader = " "
 
-local theme = "tokyonight-moon"
-
--- NetRW
---
-
-keymap('n', "<leader>n", cmd.Ex, map_options)
+local theme = "gruvbox"
 
 --
 --  Plugins
@@ -197,13 +214,19 @@ require("lazy").setup({
 
             telescope.load_extension("ui-select")
 
-            keymap('n', "<leader>ft", telescope_builtin.current_buffer_fuzzy_find, map_options)
-            keymap('n', "<leader>ff", telescope_builtin.find_files, map_options)
-            keymap('n', "<leader>fg", telescope_builtin.git_files, map_options)
+            append_keymaps({
+                { 'n', "<leader>ft", telescope_builtin.current_buffer_fuzzy_find },
+                { 'n', "<leader>ff", telescope_builtin.find_files },
+                { 'n', "<leader>fg", telescope_builtin.git_files },
 
-            -- Telescope git
-            keymap('n', "<leader>gb", telescope_builtin.git_branches, map_options)
-            keymap('n', "<leader>gs", telescope_builtin.git_status, map_options)
+                -- Telescope git
+                { 'n', "<leader>gb", telescope_builtin.git_branches },
+                { 'n', "<leader>gs", telescope_builtin.git_status },
+
+                -- Buffers
+                { 'n', "<leader>bb", telescope_builtin.buffers },
+            })
+
         end
     },
     {
@@ -244,7 +267,7 @@ require("lazy").setup({
 
             gitsigns.setup()
 
-            keymap('n', "<leader>gp", gitsigns.preview_hunk, map_options)
+            table.insert(keymaps, { 'n', "<leader>gp", gitsigns.preview_hunk, map_options })
         end
     },
     {
@@ -266,12 +289,14 @@ require("lazy").setup({
 
             local telescope_builtin = require('telescope.builtin')
 
-            keymap('n', '<space>e', vim.diagnostic.open_float, map_options)
-            keymap('n', '[d', vim.diagnostic.goto_prev, map_options)
-            keymap('n', 'ő', vim.diagnostic.goto_prev, map_options)
-            keymap('n', ']d', vim.diagnostic.goto_next, map_options)
-            keymap('n', 'ú', vim.diagnostic.goto_next, map_options)
-            keymap('n', '<space>q', vim.diagnostic.setloclist, map_options)
+            append_keymaps({
+                { 'n', '<leader>e', vim.diagnostic.open_float },
+                { 'n', '[d', vim.diagnostic.goto_prev },
+                { 'n', 'ő', vim.diagnostic.goto_prev },
+                { 'n', ']d', vim.diagnostic.goto_next },
+                { 'n', 'ú', vim.diagnostic.goto_next },
+                { 'n', '<leader>q', vim.diagnostic.setloclist },
+            })
 
             api.nvim_create_autocmd('LspAttach', {
                 group = api.nvim_create_augroup('UserLspConfig', {}),
@@ -281,23 +306,22 @@ require("lazy").setup({
 
                     local opts = { buffer = args.buf }
 
-                    keymap('n', 'gD', lsp.buf.declaration, opts)
-                    keymap('n', 'K', lsp.buf.hover, opts)
-                    keymap('n', '<leader>k', lsp.buf.signature_help, opts)
-                    keymap('n', '<leader>wa', lsp.buf.add_workspace_folder, opts)
-                    keymap('n', '<leader>wr', lsp.buf.remove_workspace_folder, opts)
-                    keymap('n', '<leader>wl', function()
-                        print(vim.inspect(lsp.buf.list_workspace_folders()))
-                    end, opts)
-                    keymap('n', '<leader>D', lsp.buf.type_definition, opts)
-                    keymap('n', '<leader>r', lsp.buf.rename, opts)
-                    keymap({ 'n', 'v' }, '<leader><return>', lsp.buf.code_action, opts)
-                    keymap('n', '<leader>F', function()
-                        lsp.buf.format { async = true }
-                    end, opts)
-                    keymap('n', "gd", telescope_builtin.lsp_definitions, opts)
-                    keymap('n', "gi", telescope_builtin.lsp_implementations, opts)
-                    keymap('n', "gr", telescope_builtin.lsp_references, opts)
+                    -- Need to rethink this
+                    append_keymaps({
+                        { 'n', 'gD', lsp.buf.declaration, opts },
+                        { 'n', '<leader>lk', lsp.buf.hover, opts },
+                        { 'n', '<leader>lh', lsp.buf.signature_help, opts },
+                        { 'n', '<leader>wa', lsp.buf.add_workspace_folder, opts },
+                        { 'n', '<leader>wr', lsp.buf.remove_workspace_folder, opts },
+                        { 'n', '<leader>wl', function() print(vim.inspect(lsp.buf.list_workspace_folders())) end, opts },
+                        { 'n', '<leader>ld', lsp.buf.type_definition, opts },
+                        { 'n', '<leader>r', lsp.buf.rename, opts },
+                        { { 'n', 'v' }, '<leader><return>', lsp.buf.code_action, opts },
+                        { 'n', '<leader>lf', function() lsp.buf.format { async = true } end, opts },
+                        { 'n', "gd", telescope_builtin.lsp_definitions, opts },
+                        { 'n', "gi", telescope_builtin.lsp_implementations, opts },
+                        { 'n', "gr", telescope_builtin.lsp_references, opts },
+                    })
 
                     local bufnr = args.buf
                     local client = lsp.get_client_by_id(args.data.client_id)
@@ -476,20 +500,21 @@ require("lazy").setup({
                 }
             }
 
-            keymap('n', "<leader>b0", "<Cmd>BufferGoto 1<CR>", map_options)
-            keymap('n', "<leader>b1", "<Cmd>BufferGoto 2<CR>", map_options)
-            keymap('n', "<leader>b2", "<Cmd>BufferGoto 3<CR>", map_options)
-            keymap('n', "<leader>b3", "<Cmd>BufferGoto 4<CR>", map_options)
-            keymap('n', "<leader>b4", "<Cmd>BufferGoto 5<CR>", map_options)
-            keymap('n', "<leader>b5", "<Cmd>BufferGoto 6<CR>", map_options)
-            keymap('n', "<leader>b6", "<Cmd>BufferGoto 7<CR>", map_options)
-            keymap('n', "<leader>b7", "<Cmd>BufferGoto 8<CR>", map_options)
-            keymap('n', "<leader>b8", "<Cmd>BufferGoto 9<CR>", map_options)
-            keymap('n', "<leader>b9", "<Cmd>BufferLast<CR>", map_options)
-            keymap('n', "<leader>bp", "<Cmd>BufferPin<CR>", map_options)
-            keymap('n', "<leader>bc", "<Cmd>BufferClose<CR>", map_options)
-
-            keymap('n', "<leader>bb", "<Cmd>Telescope buffers<CR>", map_options)
+            append_keymaps({
+                { 'n', "<leader>b0", "<Cmd>BufferGoto 1<CR>" },
+                { 'n', "<leader>b1", "<Cmd>BufferGoto 2<CR>" },
+                { 'n', "<leader>b2", "<Cmd>BufferGoto 3<CR>" },
+                { 'n', "<leader>b3", "<Cmd>BufferGoto 4<CR>" },
+                { 'n', "<leader>b4", "<Cmd>BufferGoto 5<CR>" },
+                { 'n', "<leader>b5", "<Cmd>BufferGoto 6<CR>" },
+                { 'n', "<leader>b6", "<Cmd>BufferGoto 7<CR>" },
+                { 'n', "<leader>b7", "<Cmd>BufferGoto 8<CR>" },
+                { 'n', "<leader>b8", "<Cmd>BufferGoto 9<CR>" },
+                { 'n', "<leader>b9", "<Cmd>BufferLast<CR>" },
+                -- { 'n', "<leader>bp", "<Cmd>BufferPin<CR>" },
+                { 'n', "<leader>bc", "<Cmd>BufferClose<CR>" },
+                -- { 'n', "<leader>bb", "<Cmd>Telescope buffers<CR>" },
+            })
         end
     },
     {
@@ -510,9 +535,8 @@ require("lazy").setup({
                 graph_style = "unicode",
                 kind = "replace",
             }
-
-            keymap('n', "<leader>gg", neogit.open, map_options)
-        end
+            table.insert(keymaps, { 'n', "<leader>gg", require("neogit").open })
+        end,
     },
 },
 {
@@ -526,3 +550,4 @@ cmd.colorscheme "gruvbox"
 
 api.nvim_set_hl(0, "Normal", {bg = "none" })
 api.nvim_set_hl(0, "NormalFloat", {bg = "none" })
+register_keymaps()
