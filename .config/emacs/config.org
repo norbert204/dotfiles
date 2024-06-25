@@ -442,12 +442,18 @@ Subject to change! As I use emacs I'll find more and more things that I could re
   ;; Org
   (leader-key
     "o" '(:ignore t :wk "Org commands")
-    "o t" '(org-todo-list :wk "TODO list"))
+    "o t" '(org-todo-list :wk "TODO list")
+    "o a" '(org-agenda-list :wk "Agenda list"))
 
   ;; Dired
   (general-define-key
     :keymaps 'dired-mode-map
     "n" '(dired-create-empty-file :wk "Create emtpy file"))
+
+  ;; Config file
+  (general-define-key
+    "S-<f12>" '((lambda() (interactive) (load user-init-file)) :wk "Reload config")
+    "<f12>" '((lambda() (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open config file"))
 )
 
 #+end_src

@@ -3,21 +3,22 @@ if status is-interactive
 end
 
 function fish_greeting
-    sh ~/fetch.sh
+    ~/.local/bin/linefetch
 end
 
-# TODO: make this alias more universal
-alias sysupdate="sudo aura -S archlinux-keyring && sudo aura -Syu && sudo aura -Au && cargo install-update --all && sudo flatpak update"
+alias sysupdate="~/sysupdate.sh"
 alias roll="curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash"
 alias py="python3"
-alias vim="nvim"
-alias ls="exa"
+alias proj="cd (find ~ -type d -print | fzf) && tmux new-session 'nvim .'" # TODO: tmux session quits when nvim is closed
+#alias vim="nvim"
+#alias ls="exa --noconfirm"
 alias dotnet_install="~/.dotnet/dotnet-install.sh"
 
 set -gx DOTNET_ROOT $HOME/.dotnet
 
 fish_add_path $DOTNET_ROOT
-fish_add_path "/var/lib/flatpak/exports/share"
+#fish_add_path "/var/lib/flatpak/exports/share"
 fish_add_path "~/.local/bin"
+#fish_add_path "~/.cargo/bin"
 
 starship init fish | source
