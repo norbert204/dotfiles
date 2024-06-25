@@ -120,6 +120,8 @@ local keymaps = {
     { 'n', "<leader>bn", "<cmd>bnext<cr>" },
     { 'n', "<C-S-P>", "<cmd>bprevious<cr>" },
     { 'n', "<C-S-N>", "<cmd>bnext<cr>" },
+    { 'n', "<C-P>", "<cmd>bprevious<cr>" },
+    { 'n', "<C-N>", "<cmd>bnext<cr>" },
 
     -- Split resizing
     { 'n', "<M-h>", "<C-w>5<" },
@@ -163,11 +165,7 @@ require("lazy").setup({
     {
         "nvim-lualine/lualine.nvim",
         config = function()
-            require("lualine").setup {
-                extensions = {
-                    "nvim-tree"
-                }
-            }
+            require("lualine").setup { }
         end
     },
     {
@@ -226,7 +224,6 @@ require("lazy").setup({
                 -- Buffers
                 { 'n', "<leader>bb", telescope_builtin.buffers },
             })
-
         end
     },
     {
@@ -275,13 +272,6 @@ require("lazy").setup({
         dependencies = {
             "nvim-telescope/telescope.nvim",
             "lvimuser/lsp-inlayhints.nvim",
-
-            -- "hrsh7th/nvim-cmp",
-            -- "hrsh7th/cmp-nvim-lsp",
-            -- "hrsh7th/cmp-buffer",
-            -- "hrsh7th/cmp-path",
-            -- "hrsh7th/cmp-cmdline",
-            -- "L3MON4D3/LuaSnip",
         },
         config = function()
             local inlay_hints = require("lsp-inlayhints")
@@ -307,21 +297,19 @@ require("lazy").setup({
                     local opts = { buffer = args.buf }
 
                     -- Need to rethink this
-                    append_keymaps({
-                        { 'n', 'gD', lsp.buf.declaration, opts },
-                        { 'n', '<leader>lk', lsp.buf.hover, opts },
-                        { 'n', '<leader>lh', lsp.buf.signature_help, opts },
-                        { 'n', '<leader>wa', lsp.buf.add_workspace_folder, opts },
-                        { 'n', '<leader>wr', lsp.buf.remove_workspace_folder, opts },
-                        { 'n', '<leader>wl', function() print(vim.inspect(lsp.buf.list_workspace_folders())) end, opts },
-                        { 'n', '<leader>ld', lsp.buf.type_definition, opts },
-                        { 'n', '<leader>r', lsp.buf.rename, opts },
-                        { { 'n', 'v' }, '<leader><return>', lsp.buf.code_action, opts },
-                        { 'n', '<leader>lf', function() lsp.buf.format { async = true } end, opts },
-                        { 'n', "gd", telescope_builtin.lsp_definitions, opts },
-                        { 'n', "gi", telescope_builtin.lsp_implementations, opts },
-                        { 'n', "gr", telescope_builtin.lsp_references, opts },
-                    })
+                    vim.keymap.set('n', 'gD', lsp.buf.declaration, opts)
+                    vim.keymap.set('n', '<leader>lk', lsp.buf.hover, opts)
+                    vim.keymap.set('n', '<leader>lh', lsp.buf.signature_help, opts)
+                    vim.keymap.set('n', '<leader>wa', lsp.buf.add_workspace_folder, opts)
+                    vim.keymap.set('n', '<leader>wr', lsp.buf.remove_workspace_folder, opts)
+                    vim.keymap.set('n', '<leader>wl', function() print(vim.inspect(lsp.buf.list_workspace_folders())) end, opts)
+                    vim.keymap.set('n', '<leader>ld', lsp.buf.type_definition, opts)
+                    vim.keymap.set('n', '<leader>r', lsp.buf.rename, opts)
+                    vim.keymap.set({'n', 'v'}, '<leader><return>', lsp.buf.code_action, opts)
+                    vim.keymap.set('n', '<leader>lf', function() lsp.buf.format { async = true } end, opts)
+                    vim.keymap.set('n', "gd", telescope_builtin.lsp_definitions, opts)
+                    vim.keymap.set('n', "gi", telescope_builtin.lsp_implementations, opts)
+                    vim.keymap.set('n', "gr", telescope_builtin.lsp_references, opts)
 
                     local bufnr = args.buf
                     local client = lsp.get_client_by_id(args.data.client_id)
@@ -440,6 +428,10 @@ require("lazy").setup({
                     "pyright",
                     "clangd",
                     "omnisharp",
+                    "matlab_ls",
+                    "cssls",
+                    "html",
+                    "emmet_ls",
                 }
             }
 
@@ -457,6 +449,18 @@ require("lazy").setup({
                         filetypes = { "cs", "cshtml", "razor" },
                     }
                 end,
+
+                ["matlab_ls"] = function()
+                    require("lspconfig")["matlab_ls"].setup {
+                        filetypes = {"matlab"},
+                        settings = {
+                            matlab = {
+                                installPath = "/usr/local/MATLAB/R2023b/bin/matlab",
+                            }
+                        },
+                        single_file_support = true,
+                    }
+                end
             }
         end
     },
@@ -542,6 +546,17 @@ require("lazy").setup({
                 kind = "replace",
             }
             table.insert(keymaps, { 'n', "<leader>gg", require("neogit").open })
+        end,
+    },
+    {
+        "norcalli/nvim-colorizer.lua",
+        config = function()
+            require("colorizer").setup {
+                css = {
+                    css = true;
+                    css_fn = true;
+                }
+            }
         end,
     },
 },
