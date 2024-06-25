@@ -1,0 +1,110 @@
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 16px;
+    font-weight: 400;
+}
+
+#waybar {
+    background-color: rgba(26, 27, 38, 0.9);
+}
+
+/*
+ *  Battery
+ */
+
+#battery {
+    padding: 0px 10px;
+}
+
+#battery.warning {
+    background-color: inherit;
+    color: #f7768e;
+}
+
+#battery.charging {
+    background-color: inherit;
+    color: #9ece6a;
+}
+
+/*
+ *  Backlight
+ */
+
+#backlight {
+    padding: 0px 10px;
+}
+
+/*
+ *  Clock
+ */
+
+#clock {
+    padding: 0px 10px;
+}
+
+/*
+ *  Idle inhibitor
+ */
+
+#idle_inhibitor {
+    padding: 0px 10px;
+}
+
+/*
+ *  Language
+ */
+
+#language {
+    padding: 0px 10px;
+}
+
+/*
+ *  Notification
+ */
+
+#custom-notification {
+    padding: 0px 10px;
+}
+
+/*
+ *  Pulse
+ */
+
+#pulseaudio {
+    padding: 0px 10px;
+}
+
+/*
+ *  Tray
+ */
+
+#tray {
+    padding: 0px 10px;
+}
+
+/*
+ *  Workspaces
+ */
+
+#workspaces {
+    padding-right: 10px;
+}
+
+#workspaces button:hover {
+    background-color: rgba(122, 162, 247, 0.3);
+    border-radius: 10px;
+    border: none;
+}
+
+#workspaces button.empty {
+    color: grey;
+}
+
+#workspaces button.active {
+    font-weight: 900;
+    color: #9ece6a;
+}
+
+#workspaces button.urgent {
+    color: #f7768e;
+}
