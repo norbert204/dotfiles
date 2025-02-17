@@ -173,6 +173,10 @@ require("lazy").setup({
         config = true
     },
     {
+        "catppuccin/nvim",
+        name = "catppuccin",
+    },
+    {
         "nvim-tree/nvim-web-devicons"
     },
     {
@@ -567,6 +571,6 @@ require("lazy").setup({
 })
 
 vim.o.background = "dark" -- or "light" for light mode
-cmd.colorscheme "gruvbox"
+cmd.colorscheme "catppuccin-mocha"
 
 register_keymaps()
