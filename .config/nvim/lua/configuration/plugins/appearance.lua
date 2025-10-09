@@ -7,7 +7,7 @@ return {
         "catppuccin/nvim",
         name = "catppuccin",
         config = function()
-            vim.cmd.colorscheme "catppuccin-mocha"
+            vim.cmd.colorscheme "catppuccin"
         end
     },
     {
@@ -25,16 +25,16 @@ return {
             }
         end
     },
-    {
-        "akinsho/bufferline.nvim",
-        version = "*",
-        opts = {
-            options = {
-                diagnostics = "nvim_lsp",
-                numbers = "buffer_id",
-            }
-        }
-    },
+    -- {
+    --     "akinsho/bufferline.nvim",
+    --     version = "*",
+    --     opts = {
+    --         options = {
+    --             diagnostics = "nvim_lsp",
+    --             numbers = "buffer_id",
+    --         }
+    --     }
+    -- },
     {
         "echasnovski/mini.icons",
         config = function()

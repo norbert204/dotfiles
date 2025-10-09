@@ -8,7 +8,6 @@ return {
         },
         opts = {
             graph_style = "unicode",
-            kind = "replace",
             integrations = {
                 telescope = true,
             }

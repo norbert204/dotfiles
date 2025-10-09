@@ -40,6 +40,8 @@ vim.opt.list = true
 
 vim.opt.winborder = "rounded"
 
+vim.opt.hlsearch = false
+
 if vim.fn.has("termguicolors") then
     vim.opt.termguicolors = true
 end

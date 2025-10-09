@@ -19,8 +19,6 @@ return {
                         i = {
                             ["<C-j>"] = "move_selection_next",
                             ["<C-k>"] = "move_selection_previous",
-                            -- ["<tab>"] = "move_selection_next",
-                            -- ["<S-tab>"] = "move_selection_previous",
                         },
                         n = {
                             ["<C-j>"] = "move_selection_next",
@@ -63,44 +61,27 @@ return {
             vim.keymap.set('n', "<leader>bb", telescope_builtin.buffers)
         end
     },
-    {
-        "windwp/nvim-autopairs",
-        config = true
-    },
-    {
-        "Pocco81/auto-save.nvim",
-        opts = {
-            execution_message = {
-                message = ""
-            }
-        },
-        config = true
-    },
-    {
-        "christoomey/vim-tmux-navigator",
-        cmd = {
-            "TmuxNavigateLeft",
-            "TmuxNavigateDown",
-            "TmuxNavigateUp",
-            "TmuxNavigateRight",
-            "TmuxNavigatePrevious",
-        },
-        keys = {
-            { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-            { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-            { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-            { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-            { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-        },
-    },
+    -- {
+    --     "windwp/nvim-autopairs",
+    --     config = true
+    -- },
+    -- {
+    --     "Pocco81/auto-save.nvim",
+    --     opts = {
+    --         execution_message = {
+    --             message = ""
+    --         }
+    --     },
+    --     config = true
+    -- },
     {
         "brenoprata10/nvim-highlight-colors",
         config = true,
     },
-    {
-        "tiagovla/scope.nvim",
-        config = true,
-    },
+    -- {
+    --     "tiagovla/scope.nvim",
+    --     config = true,
+    -- },
     {
         "numToStr/Comment.nvim",
         config = true,

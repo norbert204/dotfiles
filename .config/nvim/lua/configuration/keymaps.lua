@@ -25,6 +25,10 @@ local keymaps = {
     --  Search for the highlighted text
     -- { 'v', '/', "y/<C-r><C-0><return><esc>" },
 
+    -- Clipboard management
+    { {'n', 'v'}, "<A-y>", "\"+y" },
+    { {'n', 'v'}, "<A-p>", "\"+p" },
+
     --  Escape from insert mode in terminal with the same keychord as from regular insert mode
     { 't', "jk", "<C-\\><C-n>" },
 
@@ -41,12 +45,12 @@ local keymaps = {
     -- Buffers
     { 'n', "<leader>bp", "<cmd>bprevious<cr>" },
     { 'n', "<leader>bn", "<cmd>bnext<cr>" },
-    { 'n', "<C-S-P>", "<cmd>bprevious<cr>" },
-    { 'n', "<C-S-N>", "<cmd>bnext<cr>" },
-    { 'n', "<C-P>", "<cmd>bprevious<cr>" },
-    { 'n', "<C-N>", "<cmd>bnext<cr>" },
-    { 'n', "<C-[>", "<cmd>bprevious<cr>" },
-    { 'n', "<C-]>", "<cmd>bnext<cr>" },
+    -- { 'n', "<C-S-P>", "<cmd>bprevious<cr>" },
+    -- { 'n', "<C-S-N>", "<cmd>bnext<cr>" },
+    -- { 'n', "<C-P>", "<cmd>bprevious<cr>" },
+    -- { 'n', "<C-N>", "<cmd>bnext<cr>" },
+    -- { 'n', "<C-[>", "<cmd>bprevious<cr>" },
+    -- { 'n', "<C-]>", "<cmd>bnext<cr>" },
     { 'n', "<leader>bc", "<cmd>bprevious|bdelete #<cr>" },
     { 'n', "<leader>bo", "<cmd>%bdelete|edit #|normal `\"<cr>" },
 
@@ -61,7 +65,7 @@ local keymaps = {
     { 'v', ">", ">gv" },
 
     -- Other useful
-    { 'n', "<leader>tc", "%s/\\s\\+$//e" }
+    -- { 'n', "<leader>tc", "%s/\\s\\+$//e" }
 }
 
 
