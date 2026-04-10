@@ -1,8 +1,8 @@
 --
---  Made by Norbert Horvath (norbert204)
+--  Made by Norbert Horváth (norbet204)
 --
 
 require("configuration.options")
-require("configuration.functions")
 require("configuration.keymaps")
-require("configuration.lazy")
+require("configuration.plugins")
+require("configuration.functions")
